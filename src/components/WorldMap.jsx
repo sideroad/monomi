@@ -30,8 +30,7 @@ class WorldMap extends Component {
       }),
       new ScatterplotLayer({
         id: 'place',
-        data: console.log(this.props.place) ||
-              [this.props.place].filter(item => item.id),
+        data: [this.props.place].filter(item => item.id),
         opacity: 0.5,
         strokeWidth: 2,
         radiusScale: 20,
