@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import DeckGL, { ScatterplotLayer } from 'deck.gl';
 import MapGL from 'react-map-gl';
 import config from '../config';
@@ -23,18 +24,19 @@ class WorldMap extends Component {
         opacity: 0.5,
         strokeWidth: 2,
         pickable: true,
-        radiusScale: 40,
-        radiusMinPixels: 3,
-        radiusMaxPixels: 400,
+        radiusScale: 20,
+        radiusMinPixels: 2,
+        radiusMaxPixels: 200,
       }),
       new ScatterplotLayer({
         id: 'place',
-        data: [this.props.place].filter(item => item.id),
+        data: console.log(this.props.place) ||
+              [this.props.place].filter(item => item.id),
         opacity: 0.5,
         strokeWidth: 2,
-        pickable: true,
-        radiusMinPixels: 4,
-        radiusMaxPixels: 10,
+        radiusScale: 20,
+        radiusMinPixels: 2,
+        radiusMaxPixels: 100,
       })
     ];
 

@@ -1,10 +1,12 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import autoBind from 'react-autobind';
 // import update from 'immutability-helper';
 import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
+import Place from '../components/Place';
 import { update as updateMap, idle as idleMap } from '../reducers/map';
 import { initialized as placeInitialized } from '../reducers/place';
 
@@ -18,6 +20,7 @@ class Home extends Component {
       width: 1,
       height: 1,
       opened: false,
+      place: undefined
     };
     this.idle = true;
     autoBind(this);
@@ -72,8 +75,9 @@ class Home extends Component {
 
   onLayerClick(info) {
     if (info) {
-      window.open(info.object.link);
-      console.log(info, this);
+      this.setState({
+        place: info.object
+      });
     }
   }
 
@@ -106,6 +110,15 @@ class Home extends Component {
           placeInitialized={this.props.placeInitialized}
           onRender={this.onRenderWorldMap}
         />
+        {
+          this.state.place ?
+            <Place
+              name={this.state.place.name}
+              image={this.state.place.image}
+              link={this.state.place.link}
+            />
+          : null
+        }
         {this.props.children ? this.props.children : ''}
       </div>
     );

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const styles = require('../css/prev-next-button.less');
 const fa = require('../css/koiki-ui/fa/less/font-awesome.less');
