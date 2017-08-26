@@ -24,9 +24,9 @@ class WorldMap extends Component {
         opacity: 0.5,
         strokeWidth: 2,
         pickable: true,
-        radiusScale: 20,
+        radiusScale: 40,
         radiusMinPixels: 3,
-        radiusMaxPixels: 200,
+        radiusMaxPixels: 100,
       }),
       new ScatterplotLayer({
         id: 'place',
