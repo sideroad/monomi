@@ -43,7 +43,7 @@ const calc = (places) => {
           distance >= 500000 ? 5 :
           distance >= 200000 ? 6 :
           distance >= 100000 ? 7 :
-          distance >= 50000 ? 8 :
+          distance >= 750000 ? 8 :
           distance >= 20000 ? 9 :
           distance >= 10000 ? 10 :
           distance >= 5000 ? 11 :
