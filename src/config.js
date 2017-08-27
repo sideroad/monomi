@@ -2,7 +2,7 @@ require('babel-polyfill');
 const normalize = require('koiki').normalize;
 
 const title = 'monomi';
-const description = 'Walk arround the world to find your experience';
+const description = 'going on a pleasure jaunt';
 
 const environment = {
   development: {

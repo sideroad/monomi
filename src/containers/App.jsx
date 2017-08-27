@@ -12,7 +12,7 @@ const App = props =>
     {
       props.loading ? <Loading /> : ''
     }
-    <Helmet {...config.app.head} title="Feel 4 seasons, Find best date in the place" />
+    <Helmet {...config.app.head} title={config.app.description} />
     <script src="/js/analytics.js" />
   </div>;
 
