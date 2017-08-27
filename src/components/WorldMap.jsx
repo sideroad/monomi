@@ -15,28 +15,28 @@ class WorldMap extends Component {
     const layers = [
       new ScatterplotLayer({
         id: 'places',
-        data: this.props.places.map(place => ({
-          ...place,
-          color: [44, 169, 225],
-          radius: 1,
-          position: [place.lng, place.lat, 0]
-        })),
-        opacity: 0.5,
+        data: this.props.places
+          .map(place => ({
+            ...place,
+            color: [44, 169, 225],
+            radius: 1,
+            position: [place.lng, place.lat, 0]
+          }))
+          .concat([this.props.selected]
+            .filter(item => item.id)
+            .map(item => ({
+              ...item,
+              color: [230, 230, 230],
+              radius: 1
+            }))
+          ),
+        opacity: 0.75,
         strokeWidth: 2,
         pickable: true,
         radiusScale: 40,
-        radiusMinPixels: 3,
-        radiusMaxPixels: 100,
-      }),
-      new ScatterplotLayer({
-        id: 'place',
-        data: [this.props.place].filter(item => item.id),
-        opacity: 0.5,
-        strokeWidth: 2,
-        radiusScale: 20,
         radiusMinPixels: 2,
-        radiusMaxPixels: 100,
-      })
+        radiusMaxPixels: 25,
+      }),
     ];
 
     return (
@@ -69,7 +69,7 @@ WorldMap.propTypes = {
   height: PropTypes.number,
   mapViewState: PropTypes.object.isRequired,
   places: PropTypes.array.isRequired,
-  place: PropTypes.object.isRequired,
+  selected: PropTypes.object,
   placeInitialized: PropTypes.func.isRequired,
   onLayerClick: PropTypes.func.isRequired,
   onChangeViewport: PropTypes.func.isRequired
@@ -78,6 +78,7 @@ WorldMap.propTypes = {
 WorldMap.defaultProps = {
   width: undefined,
   height: undefined,
+  selected: {},
 };
 
 export default WorldMap;

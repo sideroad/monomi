@@ -8,7 +8,7 @@ import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { update as updateMap, idle as idleMap } from '../reducers/map';
-import { initialized as placeInitialized } from '../reducers/place';
+import { initialized as placeInitialized, setPlace } from '../reducers/place';
 
 const styles = require('../css/home.less');
 
@@ -20,7 +20,6 @@ class Home extends Component {
       width: 1,
       height: 1,
       opened: false,
-      place: undefined
     };
     this.idle = true;
     autoBind(this);
@@ -75,9 +74,7 @@ class Home extends Component {
 
   onLayerClick(info) {
     if (info) {
-      this.setState({
-        place: info.object
-      });
+      this.props.setPlace(info.object);
     }
   }
 
@@ -104,18 +101,18 @@ class Home extends Component {
           width={this.state.width}
           height={this.state.height}
           places={this.props.places}
-          place={this.props.place}
+          selected={this.props.place}
           onChangeViewport={this.onChangeViewport}
           onLayerClick={this.onLayerClick}
           placeInitialized={this.props.placeInitialized}
           onRender={this.onRenderWorldMap}
         />
         {
-          this.state.place ?
+          this.props.place.name ?
             <Place
-              name={this.state.place.name}
-              image={this.state.place.image}
-              link={this.state.place.link}
+              name={this.props.place.name}
+              image={this.props.place.image}
+              link={this.props.place.link}
             />
           : null
         }
@@ -131,6 +128,7 @@ Home.propTypes = {
   place: PropTypes.object.isRequired,
   mapViewState: PropTypes.object,
   updateMap: PropTypes.func.isRequired,
+  setPlace: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
 };
@@ -152,7 +150,7 @@ const connected = connect(
     place: state.place.item,
     mapViewState: state.map.mapViewState,
   }),
-  { placeInitialized, updateMap, idleMap, push }
+  { placeInitialized, updateMap, idleMap, push, setPlace }
 )(Home);
 
 export default connected;

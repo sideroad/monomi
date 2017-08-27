@@ -4,6 +4,7 @@ const GET_FAIL = 'place/GET_FAIL';
 const GETS_START = 'place/GETS_START';
 const GETS_SUCCESS = 'place/GETS_SUCCESS';
 const GETS_FAIL = 'place/GETS_FAIL';
+const SET_PLACE = 'place/SET_PLACE';
 const INITIALIZED = 'place/INITIALIZED';
 
 const initialState = {
@@ -45,15 +46,17 @@ export default function reducer(state = initialState, action = {}) {
         loading: true
       };
     case GET_SUCCESS: {
-      const location = action.res.body.result.geometry.location;
+      const res = action.res.body.result;
+      const location = res.geometry.location;
       return {
         ...state,
         loading: false,
         loaded: true,
         item: {
-          ...action.res.body.result,
-          color: [230, 230, 230],
-          radius: 5,
+          id: res.id,
+          name: res.name,
+          image: '/images/no-image-place.png',
+          link: res.url,
           position: [location.lng, location.lat, 0]
         }
       };
@@ -65,6 +68,11 @@ export default function reducer(state = initialState, action = {}) {
         loaded: false,
         error: action.error
       };
+    case SET_PLACE:
+      return {
+        ...state,
+        item: action.item
+      };
     default:
       return state;
   }
@@ -73,5 +81,12 @@ export default function reducer(state = initialState, action = {}) {
 export function initialized() {
   return {
     type: INITIALIZED,
+  };
+}
+
+export function setPlace(item) {
+  return {
+    type: SET_PLACE,
+    item
   };
 }

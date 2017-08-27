@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import autoBind from 'react-autobind';
 import { Chips } from 'koiki-ui';
 
 const styles = require('../css/find-place.less');
@@ -20,6 +21,24 @@ class FindPlace extends Component {
     this.state = {
       focused: false
     };
+    autoBind(this);
+  }
+
+  onFocus() {
+    this.setState({ focused: true });
+  }
+
+  onBlur() {
+    this.setState({ focused: false });
+  }
+
+  onChange(evt) {
+    this.props.onChange(evt.target.value);
+  }
+
+  onSelect(item) {
+    this.chips.input.inputDOM.blur();
+    this.props.onSelect(item);
   }
 
   render() {
@@ -29,13 +48,10 @@ class FindPlace extends Component {
           ref={(elem) => { this.chips = elem; }}
           styles={ui}
           suggests={this.props.suggests}
-          onFocus={() => this.setState({ focused: true })}
-          onBlur={() => this.setState({ focused: false })}
-          onChange={evt => this.props.onChange(evt.target.value)}
-          onSelect={(item) => {
-            this.chips.input.inputDOM.blur();
-            this.props.onSelect(item);
-          }}
+          onFocus={this.onFocus}
+          onBlur={this.onBlur}
+          onChange={this.onChange}
+          onSelect={this.onSelect}
         />
       </div>
     );
