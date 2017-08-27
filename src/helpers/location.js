@@ -39,17 +39,17 @@ const calc = (places) => {
   return {
     latitude: Number(center.latitude),
     longitude: Number(center.longitude),
-    zoom: distance >= 1000000 ? 4 :
-          distance >= 500000 ? 5 :
-          distance >= 200000 ? 6 :
-          distance >= 100000 ? 7 :
-          distance >= 750000 ? 8 :
-          distance >= 20000 ? 9 :
-          distance >= 10000 ? 10 :
-          distance >= 5000 ? 11 :
-          distance >= 2000 ? 12 :
-          distance >= 2000 ? 13 :
-          distance >= 1000 ? 13 : 14
+    zoom: distance >= 1000000 ? 6 :
+          distance >= 500000 ? 7 :
+          distance >= 200000 ? 8 :
+          distance >= 100000 ? 9 :
+          distance >= 750000 ? 10 :
+          distance >= 20000 ? 11 :
+          distance >= 10000 ? 12 :
+          distance >= 5000 ? 13 :
+          distance >= 2000 ? 14 :
+          distance >= 2000 ? 15 :
+          distance >= 1000 ? 16 : 16
   };
 };
 

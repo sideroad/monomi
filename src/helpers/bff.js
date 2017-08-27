@@ -14,13 +14,33 @@ export default function ({ app }) {
       request
         .get('https://chaus.herokuapp.com/apis/monomi/tags')
         .send({
-          name: `*${req.query.input}*`
+          name: `*${req.query.input}*`,
+          limit: 1000
         })
         .then(response =>
           response.body.items.map(item => ({
             ...item,
             name: `# ${item.name}`
           }))
+        )
+        .then(tags =>
+          Promise.all(tags.map(tag =>
+            request
+              .get('https://chaus.herokuapp.com/apis/monomi/taggings')
+              .send({
+                tag: tag.id
+              })
+              .then(response => ({
+                ...tag,
+                count: response.body.items.length
+              }))
+          ))
+        )
+        .then(tags =>
+          tags
+            .sort((a, b) => a.count <= b.count)
+            .slice(0, 5)
+            .filter(tag => tag.count >= 10)
         ),
       request
         .get(`https://${config.googleapis.host}/maps/api/place/autocomplete/json?key=${config.googleapis.key}&input=${encodeURIComponent(req.query.input)}`)
