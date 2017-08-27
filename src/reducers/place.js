@@ -39,7 +39,12 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         loading: false,
         loaded: true,
-        items: action.res.body.items
+        items: action.res.body.items.map(item => ({
+          ...item,
+          color: [44, 169, 225],
+          radius: 1,
+          position: [item.lng, item.lat, 0]
+        }))
       };
     case GETS_FAIL:
       return {
@@ -70,7 +75,12 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         loading: false,
         loaded: true,
-        items: action.items
+        items: action.items.map(item => ({
+          ...item,
+          color: [44, 169, 225],
+          radius: 1,
+          position: [item.lng, item.lat, 0]
+        }))
       };
     case SET_CURRENT_PLACE:
       return {
