@@ -8,7 +8,7 @@ import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { update as updateMap, idle as idleMap } from '../reducers/map';
-import { initialized as placeInitialized, setPlace, setCurrentPlace } from '../reducers/place';
+import { initialized as placeInitialized, setPlace, setCurrentPlace, setFindPlace } from '../reducers/place';
 import getLocation from '../helpers/location';
 
 const styles = require('../css/home.less');
@@ -74,6 +74,7 @@ class Home extends Component {
           longitude: location.lng,
           zoom: 14,
         });
+        this.props.setFindPlace(res.body.result);
       }
     );
   }
@@ -145,6 +146,7 @@ Home.propTypes = {
   updateMap: PropTypes.func.isRequired,
   setPlace: PropTypes.func.isRequired,
   setCurrentPlace: PropTypes.func.isRequired,
+  setFindPlace: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
 };
@@ -167,7 +169,7 @@ const connected = connect(
     current: state.place.current,
     mapViewState: state.map.mapViewState,
   }),
-  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace }
+  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace, setFindPlace }
 )(Home);
 
 export default connected;

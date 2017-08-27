@@ -7,11 +7,27 @@ import config from '../config';
 const TOKEN = config.mapbox.token;
 
 class WorldMap extends Component {
+  componentDidMount() {
+    this.map = this.mapgl.getMap();
+  }
+
   render() {
     if (__SERVER__) {
       return (<div />);
     }
-
+    const map = this.map || {
+      getBounds: () => ({
+        _sw: {
+          lat: 0,
+          lng: 0
+        },
+        _ne: {
+          lat: 0,
+          lng: 0
+        }
+      })
+    };
+    const { _sw, _ne } = map.getBounds();
     const layers = [
       new ScatterplotLayer({
         id: 'places',
@@ -22,6 +38,12 @@ class WorldMap extends Component {
             radius: 1,
             position: [item.lng, item.lat, 0]
           }))
+          .filter(item =>
+            item.lat >= _sw.lat &&
+            item.lat <= _ne.lat &&
+            item.lng >= _sw.lng &&
+            item.lng <= _ne.lng
+          )
           .concat([this.props.selected]
             .filter(item => item.id)
             .map(item => ({
