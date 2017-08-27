@@ -5,9 +5,11 @@ const GETS_START = 'place/GETS_START';
 const GETS_SUCCESS = 'place/GETS_SUCCESS';
 const GETS_FAIL = 'place/GETS_FAIL';
 const SET_PLACE = 'place/SET_PLACE';
+const SET_CURRENT_PLACE = 'place/SET_CURRENT_PLACE';
 const INITIALIZED = 'place/INITIALIZED';
 
 const initialState = {
+  current: {},
   item: {},
   items: [],
   initialized: false,
@@ -73,6 +75,14 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         item: action.item
       };
+    case SET_CURRENT_PLACE:
+      return {
+        ...state,
+        current: {
+          id: 'current-position',
+          ...action.item
+        }
+      };
     default:
       return state;
   }
@@ -87,6 +97,13 @@ export function initialized() {
 export function setPlace(item) {
   return {
     type: SET_PLACE,
+    item
+  };
+}
+
+export function setCurrentPlace(item) {
+  return {
+    type: SET_CURRENT_PLACE,
     item
   };
 }

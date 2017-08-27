@@ -16,11 +16,11 @@ class WorldMap extends Component {
       new ScatterplotLayer({
         id: 'places',
         data: this.props.places
-          .map(place => ({
-            ...place,
+          .map(item => ({
+            ...item,
             color: [44, 169, 225],
             radius: 1,
-            position: [place.lng, place.lat, 0]
+            position: [item.lng, item.lat, 0]
           }))
           .concat([this.props.selected]
             .filter(item => item.id)
@@ -28,6 +28,15 @@ class WorldMap extends Component {
               ...item,
               color: [230, 230, 230],
               radius: 1
+            }))
+          )
+          .concat([this.props.current]
+            .filter(item => item.id)
+            .map(item => ({
+              ...item,
+              color: [170, 207, 83],
+              radius: 1,
+              position: [item.lng, item.lat, 0]
             }))
           ),
         opacity: 0.75,
@@ -70,6 +79,7 @@ WorldMap.propTypes = {
   mapViewState: PropTypes.object.isRequired,
   places: PropTypes.array.isRequired,
   selected: PropTypes.object,
+  current: PropTypes.object,
   placeInitialized: PropTypes.func.isRequired,
   onLayerClick: PropTypes.func.isRequired,
   onChangeViewport: PropTypes.func.isRequired
@@ -79,6 +89,7 @@ WorldMap.defaultProps = {
   width: undefined,
   height: undefined,
   selected: {},
+  current: {},
 };
 
 export default WorldMap;

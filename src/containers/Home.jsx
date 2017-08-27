@@ -8,7 +8,8 @@ import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { update as updateMap, idle as idleMap } from '../reducers/map';
-import { initialized as placeInitialized, setPlace } from '../reducers/place';
+import { initialized as placeInitialized, setPlace, setCurrentPlace } from '../reducers/place';
+import getLocation from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -34,6 +35,18 @@ class Home extends Component {
       limit: 100000
     });
     window.addEventListener('resize', () => this.onResize());
+    getLocation()
+      .then((location) => {
+        this.props.setCurrentPlace({
+          ...location
+        });
+        this.props.updateMap({
+          ...this.props.mapViewState,
+          latitude: location.lat,
+          longitude: location.lng,
+          zoom: 14,
+        });
+      });
   }
 
   onResize() {
@@ -59,7 +72,7 @@ class Home extends Component {
           ...this.props.mapViewState,
           latitude: location.lat,
           longitude: location.lng,
-          zoom: 13,
+          zoom: 14,
         });
       }
     );
@@ -102,6 +115,7 @@ class Home extends Component {
           height={this.state.height}
           places={this.props.places}
           selected={this.props.place}
+          current={this.props.current}
           onChangeViewport={this.onChangeViewport}
           onLayerClick={this.onLayerClick}
           placeInitialized={this.props.placeInitialized}
@@ -126,9 +140,11 @@ Home.propTypes = {
   places: PropTypes.array.isRequired,
   suggests: PropTypes.array.isRequired,
   place: PropTypes.object.isRequired,
+  current: PropTypes.object.isRequired,
   mapViewState: PropTypes.object,
   updateMap: PropTypes.func.isRequired,
   setPlace: PropTypes.func.isRequired,
+  setCurrentPlace: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
 };
@@ -148,9 +164,10 @@ const connected = connect(
     places: state.place.items,
     suggests: state.suggest.items,
     place: state.place.item,
+    current: state.place.current,
     mapViewState: state.map.mapViewState,
   }),
-  { placeInitialized, updateMap, idleMap, push, setPlace }
+  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace }
 )(Home);
 
 export default connected;

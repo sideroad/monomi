@@ -13,7 +13,7 @@ const initialState = {
     latitude: 35.949097014978605,
     longitude: 136.00705539354635,
     zoom: 5.2,
-    pitch: 40,
+    pitch: 30,
     bearing: 0
   },
   idle: true,
