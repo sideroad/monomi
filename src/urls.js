@@ -11,6 +11,13 @@ export default {
       }
     },
     get: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/places/:id',
+      method: 'GET',
+      cache: {
+        server: true,
+      }
+    },
+    find: {
       url: `${config.app.base}/bff/google/maps/api/place/details/json`,
       method: 'GET',
       defaults: {
@@ -24,10 +31,17 @@ export default {
   },
   suggest: {
     gets: {
-      url: '/bff/google/maps/api/place/autocomplete/json',
+      url: '/apis/suggests',
+      method: 'GET'
+    }
+  },
+  tagging: {
+    gets: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/taggings',
       method: 'GET',
-      defaults: {
-        key: config.googleapis.key
+      cache: {
+        client: true,
+        server: true,
       }
     }
   }

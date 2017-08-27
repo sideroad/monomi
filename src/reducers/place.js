@@ -4,6 +4,7 @@ const GETS_START = 'place/GETS_START';
 const GETS_SUCCESS = 'place/GETS_SUCCESS';
 const GETS_FAIL = 'place/GETS_FAIL';
 const SET_PLACE = 'place/SET_PLACE';
+const SET_PLACES = 'place/SET_PLACES';
 const SET_CURRENT_PLACE = 'place/SET_CURRENT_PLACE';
 const SET_FIND_PLACE = 'place/SET_FIND_PLACE';
 const INITIALIZED = 'place/INITIALIZED';
@@ -64,6 +65,13 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         item: action.item
       };
+    case SET_PLACES:
+      return {
+        ...state,
+        loading: false,
+        loaded: true,
+        items: action.items
+      };
     case SET_CURRENT_PLACE:
       return {
         ...state,
@@ -117,5 +125,12 @@ export function setCurrentPlace(item) {
   return {
     type: SET_CURRENT_PLACE,
     item
+  };
+}
+
+export function setPlaces(items) {
+  return {
+    type: SET_PLACES,
+    items
   };
 }

@@ -8,8 +8,8 @@ import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { update as updateMap, idle as idleMap } from '../reducers/map';
-import { initialized as placeInitialized, setPlace, setCurrentPlace, setFindPlace } from '../reducers/place';
-import getLocation from '../helpers/location';
+import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace } from '../reducers/place';
+import { get as getLocation, calc as calcLocation } from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -63,20 +63,42 @@ class Home extends Component {
   }
 
   onSelectPlace(item) {
-    this.context.fetcher.place.get({
-      placeid: item.id
-    }).then(
-      (res) => {
-        const location = res.body.result.geometry.location;
-        this.props.updateMap({
-          ...this.props.mapViewState,
-          latitude: location.lat,
-          longitude: location.lng,
-          zoom: 14,
+    console.log(item);
+    if (/^# /.test(item.name)) {
+      this.context.fetcher.tagging.gets({
+        tag: item.id
+      }).then((res) => {
+        Promise.all(
+          res.body.items.map(tagging =>
+            this.context.fetcher.place.get({
+              id: tagging.place.id
+            })
+            .then(json => json.body)
+          )
+        ).then((places) => {
+          this.props.updateMap({
+            ...this.props.mapViewState,
+            ...calcLocation(places)
+          });
+          this.props.setPlaces(places);
         });
-        this.props.setFindPlace(res.body.result);
-      }
-    );
+      });
+    } else {
+      this.context.fetcher.place.find({
+        placeid: item.id
+      }).then(
+        (res) => {
+          const location = res.body.result.geometry.location;
+          this.props.updateMap({
+            ...this.props.mapViewState,
+            latitude: location.lat,
+            longitude: location.lng,
+            zoom: 14,
+          });
+          this.props.setFindPlace(res.body.result);
+        }
+      );
+    }
   }
 
   onChangeViewport(mapViewState) {
@@ -147,6 +169,7 @@ Home.propTypes = {
   setPlace: PropTypes.func.isRequired,
   setCurrentPlace: PropTypes.func.isRequired,
   setFindPlace: PropTypes.func.isRequired,
+  setPlaces: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
 };
@@ -169,7 +192,7 @@ const connected = connect(
     current: state.place.current,
     mapViewState: state.map.mapViewState,
   }),
-  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace, setFindPlace }
+  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace, setFindPlace, setPlaces }
 )(Home);
 
 export default connected;
