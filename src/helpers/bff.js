@@ -28,7 +28,8 @@ export default function ({ app }) {
             request
               .get('https://chaus.herokuapp.com/apis/monomi/taggings')
               .send({
-                tag: tag.id
+                tag: tag.id,
+                limit: 10000
               })
               .then(response => ({
                 ...tag,
