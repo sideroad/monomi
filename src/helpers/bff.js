@@ -29,17 +29,18 @@ export default function ({ app }) {
               .get('https://chaus.herokuapp.com/apis/monomi/taggings')
               .send({
                 tag: tag.id,
-                limit: 10000
+                limit: 1
               })
               .then(response => ({
                 ...tag,
-                count: response.body.items.length
+                count: response.body.size
               }))
           ))
         )
         .then(tags =>
           tags
-            .sort((a, b) => a.count <= b.count)
+            .sort((a, b) => a.count < b.count ? 1 :
+                            a.count > b.count ? -1 : 0)
             .slice(0, 5)
             .filter(tag => tag.count >= 10)
         ),
