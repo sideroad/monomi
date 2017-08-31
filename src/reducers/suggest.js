@@ -1,4 +1,7 @@
 
+export const TAG = 'TAG';
+export const PLACE = 'PLACE';
+
 const GETS_START = 'suggest/GETS_START';
 const GETS_SUCCESS = 'suggest/GETS_SUCCESS';
 const GETS_FAIL = 'suggest/GETS_FAIL';

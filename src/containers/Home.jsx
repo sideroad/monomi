@@ -7,7 +7,7 @@ import autoBind from 'react-autobind';
 import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
-import { update as updateMap, idle as idleMap } from '../reducers/map';
+import { TAG } from '../reducers/suggest';
 import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace } from '../reducers/place';
 import { get as getLocation, calc as calcLocation } from '../helpers/location';
 
@@ -21,8 +21,14 @@ class Home extends Component {
       width: 1,
       height: 1,
       opened: false,
+      mapViewState: {
+        latitude: 35.949097014978605,
+        longitude: 136.00705539354635,
+        zoom: 5.2,
+        pitch: 30,
+        bearing: 0
+      },
     };
-    this.idle = true;
     autoBind(this);
   }
 
@@ -40,11 +46,14 @@ class Home extends Component {
         this.props.setCurrentPlace({
           ...location
         });
-        this.props.updateMap({
-          ...this.props.mapViewState,
-          latitude: location.lat,
-          longitude: location.lng,
-          zoom: 14,
+
+        this.setState({
+          mapViewState: {
+            ...this.state.mapViewState,
+            latitude: location.lat,
+            longitude: location.lng,
+            zoom: 15,
+          }
         });
       });
   }
@@ -64,7 +73,7 @@ class Home extends Component {
 
   onSelectPlace(item) {
     console.log(item);
-    if (/^# /.test(item.name)) {
+    if (item.type === TAG) {
       this.context.fetcher.tagging.gets({
         tag: item.id
       }).then((res) => {
@@ -76,24 +85,33 @@ class Home extends Component {
             .then(json => json.body)
           )
         ).then((places) => {
-          this.props.updateMap({
-            ...this.props.mapViewState,
-            ...calcLocation(places)
+          const calcedViewState = calcLocation(places);
+          this.setState({
+            mapViewState: {
+              ...this.state.mapViewState,
+              ...calcedViewState
+            }
           });
           this.props.setPlaces(places);
+          this.props.setPlace(calcedViewState.place);
         });
       });
     } else {
+      this.context.fetcher.place.gets({
+        limit: 100000
+      });
       this.context.fetcher.place.find({
         placeid: item.id
       }).then(
         (res) => {
           const location = res.body.result.geometry.location;
-          this.props.updateMap({
-            ...this.props.mapViewState,
-            latitude: location.lat,
-            longitude: location.lng,
-            zoom: 14,
+          this.setState({
+            mapViewState: {
+              ...this.state.mapViewState,
+              latitude: location.lat,
+              longitude: location.lng,
+              zoom: 15,
+            }
           });
           this.props.setFindPlace(res.body.result);
         }
@@ -101,10 +119,12 @@ class Home extends Component {
     }
   }
 
-  onChangeViewport(mapViewState) {
-    this.props.updateMap({
-      ...mapViewState,
-      pitch: mapViewState.pitch > 60 ? 60 : mapViewState.pitch
+  onViewportChange(mapViewState) {
+    this.setState({
+      mapViewState: {
+        ...mapViewState,
+        pitch: mapViewState.pitch > 60 ? 60 : mapViewState.pitch
+      }
     });
   }
 
@@ -133,13 +153,13 @@ class Home extends Component {
         />
         <WorldMap
           ref={(elem) => { this.worldMap = elem; }}
-          mapViewState={this.props.mapViewState}
+          mapViewState={this.state.mapViewState}
           width={this.state.width}
           height={this.state.height}
           places={this.props.places}
           selected={this.props.place}
           current={this.props.current}
-          onChangeViewport={this.onChangeViewport}
+          onViewportChange={this.onViewportChange}
           onLayerClick={this.onLayerClick}
           placeInitialized={this.props.placeInitialized}
           onRender={this.onRenderWorldMap}
@@ -164,8 +184,6 @@ Home.propTypes = {
   suggests: PropTypes.array.isRequired,
   place: PropTypes.object.isRequired,
   current: PropTypes.object.isRequired,
-  mapViewState: PropTypes.object,
-  updateMap: PropTypes.func.isRequired,
   setPlace: PropTypes.func.isRequired,
   setCurrentPlace: PropTypes.func.isRequired,
   setFindPlace: PropTypes.func.isRequired,
@@ -175,7 +193,6 @@ Home.propTypes = {
 };
 
 Home.defaultProps = {
-  mapViewState: {},
 };
 
 Home.contextTypes = {
@@ -190,9 +207,8 @@ const connected = connect(
     suggests: state.suggest.items,
     place: state.place.item,
     current: state.place.current,
-    mapViewState: state.map.mapViewState,
   }),
-  { placeInitialized, updateMap, idleMap, push, setPlace, setCurrentPlace, setFindPlace, setPlaces }
+  { placeInitialized, push, setPlace, setCurrentPlace, setFindPlace, setPlaces }
 )(Home);
 
 export default connected;

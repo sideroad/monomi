@@ -58,9 +58,9 @@ class WorldMap extends Component {
         opacity: 0.75,
         strokeWidth: 2,
         pickable: true,
-        radiusScale: 40,
-        radiusMinPixels: 2,
-        radiusMaxPixels: 25,
+        radiusScale: 25,
+        radiusMinPixels: 10,
+        radiusMaxPixels: 15,
       }),
     ];
 
@@ -71,9 +71,9 @@ class WorldMap extends Component {
         height={this.props.height}
         {...this.props.mapViewState}
         mapboxApiAccessToken={TOKEN}
-        perspectiveEnabled
+        dragRotate
         mapStyle="mapbox://styles/sideroad/ciz10g2k7000p2rq7hd9jp215"
-        onChangeViewport={this.props.onChangeViewport}
+        onViewportChange={this.props.onViewportChange}
       >
         <DeckGL
           debug
@@ -98,7 +98,7 @@ WorldMap.propTypes = {
   current: PropTypes.object,
   placeInitialized: PropTypes.func.isRequired,
   onLayerClick: PropTypes.func.isRequired,
-  onChangeViewport: PropTypes.func.isRequired
+  onViewportChange: PropTypes.func.isRequired
 };
 
 WorldMap.defaultProps = {

@@ -1,6 +1,7 @@
 import { proxy } from 'koiki';
 import request from 'superagent';
 import config from '../config';
+import { TAG, PLACE } from '../reducers/suggest';
 
 export default function ({ app }) {
   proxy({
@@ -20,7 +21,8 @@ export default function ({ app }) {
         .then(response =>
           response.body.items.map(item => ({
             ...item,
-            name: `# ${item.name}`
+            type: TAG,
+            image: '/images/tag.png'
           }))
         )
         .then(tags =>
@@ -54,6 +56,8 @@ export default function ({ app }) {
           response.body.predictions.map(prediction => ({
             id: prediction.place_id,
             name: prediction.terms.map(term => term.value).join(', '),
+            type: PLACE,
+            image: '/images/pin.png'
           }))
         ),
     ]).then(([tags, places]) => {
