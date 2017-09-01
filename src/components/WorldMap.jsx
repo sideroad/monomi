@@ -15,29 +15,11 @@ class WorldMap extends Component {
     if (__SERVER__) {
       return (<div />);
     }
-    // const map = this.map || {
-    //   getBounds: () => ({
-    //     _sw: {
-    //       lat: 0,
-    //       lng: 0
-    //     },
-    //     _ne: {
-    //       lat: 0,
-    //       lng: 0
-    //     }
-    //   })
-    // };
-    // const { _sw, _ne } = map.getBounds();
+
     const layers = [
       new ScatterplotLayer({
         id: 'places',
         data: this.props.places
-          // .filter(item =>
-          //   item.lat >= _sw.lat &&
-          //   item.lat <= _ne.lat &&
-          //   item.lng >= _sw.lng &&
-          //   item.lng <= _ne.lng
-          // )
           .concat([this.props.selected]
             .filter(item => item.id)
             .map(item => ({

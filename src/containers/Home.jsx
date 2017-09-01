@@ -9,7 +9,7 @@ import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { TAG } from '../reducers/suggest';
 import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace } from '../reducers/place';
-import { get as getLocation, calc as calcLocation } from '../helpers/location';
+import { watch as watchLocation, calc as calcLocation } from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -41,21 +41,20 @@ class Home extends Component {
       limit: 100000
     });
     window.addEventListener('resize', () => this.onResize());
-    getLocation()
-      .then((location) => {
-        this.props.setCurrentPlace({
-          ...location
-        });
-
-        this.setState({
-          mapViewState: {
-            ...this.state.mapViewState,
-            latitude: location.lat,
-            longitude: location.lng,
-            zoom: 15,
-          }
-        });
+    watchLocation((location) => {
+      this.props.setCurrentPlace({
+        ...location
       });
+
+      this.setState({
+        mapViewState: {
+          ...this.state.mapViewState,
+          latitude: location.lat,
+          longitude: location.lng,
+          zoom: 15,
+        }
+      });
+    });
   }
 
   onResize() {
