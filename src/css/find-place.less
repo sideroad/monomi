@@ -11,6 +11,19 @@
   transition-duration: 0.2s;
 }
 
+.current {
+  position: absolute;
+  top: 0;
+  right: 0.25em;
+  font-size: 1.85em;
+  color: @moegi;
+  z-index: 1;
+}
+
+.hide {
+  display: none;
+}
+
 .chips.focused {
   width: 50%;
   transition-property: width;
@@ -20,6 +33,7 @@
 .chips .input{
   padding: 0;
 }
+
 
 @media(max-width:768px) {
   .chips.focused {

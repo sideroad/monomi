@@ -9,9 +9,15 @@ const watch = callback =>
   }, () => callback({
     lat: 35.949097014978605,
     lng: 136.00705539354635,
-  }), {
-    maximumAge: 1000
-  });
+  }));
+
+const get = callback =>
+  navigator.geolocation.getCurrentPosition((location) => {
+    callback({
+      lat: location.coords.latitude,
+      lng: location.coords.longitude
+    });
+  }, err => console.log(err));
 
 const calc = (places) => {
   const center = geolib.getCenter(places.map(place => ({
@@ -35,5 +41,6 @@ const calc = (places) => {
 
 export {
   watch,
+  get,
   calc
 };

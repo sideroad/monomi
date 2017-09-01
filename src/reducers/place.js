@@ -9,6 +9,8 @@ const SET_CURRENT_PLACE = 'place/SET_CURRENT_PLACE';
 const SET_FIND_PLACE = 'place/SET_FIND_PLACE';
 const INITIALIZED = 'place/INITIALIZED';
 const REFRESH = 'place/REFRESH';
+const ENABLE_TRACE = 'place/ENABLE_TRACE';
+const DISABLE_TRACE = 'place/DISABLE_TRACE';
 
 const initialState = {
   current: {},
@@ -16,7 +18,8 @@ const initialState = {
   items: [],
   initialized: false,
   loaded: false,
-  loading: false
+  loading: false,
+  trace: true,
 };
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
@@ -106,6 +109,16 @@ export default function reducer(state = initialState, action = {}) {
         }
       };
     }
+    case ENABLE_TRACE:
+      return {
+        ...state,
+        trace: true
+      };
+    case DISABLE_TRACE:
+      return {
+        ...state,
+        trace: false
+      };
     default:
       return state;
   }
@@ -142,5 +155,17 @@ export function setPlaces(items) {
   return {
     type: SET_PLACES,
     items
+  };
+}
+
+export function enableTrace() {
+  return {
+    type: ENABLE_TRACE
+  };
+}
+
+export function disableTrace() {
+  return {
+    type: DISABLE_TRACE
   };
 }

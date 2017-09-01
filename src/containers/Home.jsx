@@ -8,8 +8,8 @@ import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import { TAG } from '../reducers/suggest';
-import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace } from '../reducers/place';
-import { watch as watchLocation, calc as calcLocation } from '../helpers/location';
+import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace } from '../reducers/place';
+import { watch as watchLocation, get as getLocation, calc as calcLocation } from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -24,7 +24,7 @@ class Home extends Component {
       mapViewState: {
         latitude: 35.949097014978605,
         longitude: 136.00705539354635,
-        zoom: 5.2,
+        zoom: 15,
         pitch: 30,
         bearing: 0
       },
@@ -41,20 +41,13 @@ class Home extends Component {
       limit: 100000
     });
     window.addEventListener('resize', () => this.onResize());
-    watchLocation((location) => {
-      this.props.setCurrentPlace({
-        ...location
-      });
+    watchLocation(this.syncLocation);
+  }
 
-      this.setState({
-        mapViewState: {
-          ...this.state.mapViewState,
-          latitude: location.lat,
-          longitude: location.lng,
-          zoom: 15,
-        }
-      });
-    });
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.trace) {
+      getLocation(this.syncLocation);
+    }
   }
 
   onResize() {
@@ -70,8 +63,11 @@ class Home extends Component {
     });
   }
 
+  onClickCurrentPlace() {
+    this.props.enableTrace();
+  }
+
   onSelectPlace(item) {
-    console.log(item);
     if (item.type === TAG) {
       this.context.fetcher.tagging.gets({
         tag: item.id
@@ -119,6 +115,9 @@ class Home extends Component {
   }
 
   onViewportChange(mapViewState) {
+    if (this.props.trace) {
+      this.props.disableTrace();
+    }
     this.setState({
       mapViewState: {
         ...mapViewState,
@@ -130,6 +129,22 @@ class Home extends Component {
   onLayerClick(info) {
     if (info) {
       this.props.setPlace(info.object);
+    }
+  }
+
+  syncLocation(location) {
+    this.props.setCurrentPlace({
+      ...location
+    });
+
+    if (this.props.trace) {
+      this.setState({
+        mapViewState: {
+          ...this.state.mapViewState,
+          latitude: location.lat,
+          longitude: location.lng,
+        }
+      });
     }
   }
 
@@ -149,6 +164,8 @@ class Home extends Component {
           suggests={this.props.suggests}
           onChange={this.onChangePlace}
           onSelect={this.onSelectPlace}
+          onClickCurrentPlace={this.onClickCurrentPlace}
+          trace={this.props.trace}
         />
         <WorldMap
           ref={(elem) => { this.worldMap = elem; }}
@@ -189,6 +206,9 @@ Home.propTypes = {
   setPlaces: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
+  enableTrace: PropTypes.func.isRequired,
+  disableTrace: PropTypes.func.isRequired,
+  trace: PropTypes.bool.isRequired,
 };
 
 Home.defaultProps = {
@@ -206,8 +226,18 @@ const connected = connect(
     suggests: state.suggest.items,
     place: state.place.item,
     current: state.place.current,
+    trace: state.place.trace,
   }),
-  { placeInitialized, push, setPlace, setCurrentPlace, setFindPlace, setPlaces }
+  {
+    placeInitialized,
+    push,
+    setPlace,
+    setCurrentPlace,
+    setFindPlace,
+    setPlaces,
+    enableTrace,
+    disableTrace
+  }
 )(Home);
 
 export default connected;

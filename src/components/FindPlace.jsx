@@ -53,6 +53,12 @@ class FindPlace extends Component {
           onChange={this.onChange}
           onSelect={this.onSelect}
         />
+        <button
+          className={`${styles.current} ${this.props.trace || !this.state.focused ? styles.hide : ''}`}
+          onClick={this.props.onClickCurrentPlace}
+        >
+          <i className={`${ui.fa.fa} ${ui.fa['fa-crosshairs']}`} />
+        </button>
       </div>
     );
   }
@@ -62,6 +68,8 @@ FindPlace.propTypes = {
   suggests: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
+  onClickCurrentPlace: PropTypes.func.isRequired,
+  trace: PropTypes.bool.isRequired,
 };
 
 export default FindPlace;
