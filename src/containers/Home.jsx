@@ -45,7 +45,7 @@ class Home extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.trace) {
+    if (!this.props.trace && nextProps.trace) {
       getLocation(this.syncLocation);
     }
   }

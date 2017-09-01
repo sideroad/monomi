@@ -41,6 +41,11 @@ class FindPlace extends Component {
     this.props.onSelect(item);
   }
 
+  onClickCurrentPlace() {
+    this.props.onClickCurrentPlace();
+    this.chips.input.inputDOM.blur();
+  }
+
   render() {
     return (
       <div className={`${styles.chips} ${this.state.focused ? styles.focused : ''}`}>
@@ -55,7 +60,7 @@ class FindPlace extends Component {
         />
         <button
           className={`${styles.current} ${this.props.trace || !this.state.focused ? styles.hide : ''}`}
-          onClick={this.props.onClickCurrentPlace}
+          onClick={this.onClickCurrentPlace}
         >
           <i className={`${ui.fa.fa} ${ui.fa['fa-crosshairs']}`} />
         </button>
