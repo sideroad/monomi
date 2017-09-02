@@ -26,10 +26,12 @@ class FindPlace extends Component {
 
   onFocus() {
     this.setState({ focused: true });
+    this.props.onFocus();
   }
 
   onBlur() {
     this.setState({ focused: false });
+    this.props.onBlur();
   }
 
   onChange(evt) {
@@ -73,6 +75,8 @@ FindPlace.propTypes = {
   suggests: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
   onClickCurrentPlace: PropTypes.func.isRequired,
   trace: PropTypes.bool.isRequired,
 };

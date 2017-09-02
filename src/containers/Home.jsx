@@ -7,8 +7,9 @@ import autoBind from 'react-autobind';
 import FindPlace from '../components/FindPlace';
 import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
+import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
-import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace } from '../reducers/place';
+import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace, toggleFilter } from '../reducers/place';
 import { watch as watchLocation, get as getLocation, calc as calcLocation } from '../helpers/location';
 
 const styles = require('../css/home.less');
@@ -28,6 +29,7 @@ class Home extends Component {
         pitch: 30,
         bearing: 0
       },
+      focused: false,
     };
     autoBind(this);
   }
@@ -62,6 +64,18 @@ class Home extends Component {
     });
   }
 
+  onFocusPlaceFinder() {
+    this.setState({
+      focused: true
+    });
+  }
+
+  onBlurPlaceFinder() {
+    this.setState({
+      focused: false
+    });
+  }
+
   onChangePlace(input) {
     this.context.fetcher.suggest.gets({
       input
@@ -70,6 +84,17 @@ class Home extends Component {
 
   onClickCurrentPlace() {
     this.props.enableTrace();
+  }
+
+  onClickFilter() {
+    this.props.toggleFilter();
+    if (this.props.filtered) {
+      this.context.fetcher.place.gets({
+        limit: 100000
+      });
+    } else {
+      this.props.setPlaces(this.props.places.filter(place => place.favorite));
+    }
   }
 
   onClickFavorite() {
@@ -114,22 +139,35 @@ class Home extends Component {
       this.context.fetcher.place.gets({
         limit: 100000
       });
-      this.context.fetcher.place.find({
-        placeid: item.id
-      }).then(
-        (res) => {
-          const location = res.body.result.geometry.location;
-          this.setState({
-            mapViewState: {
-              ...this.state.mapViewState,
-              latitude: location.lat,
-              longitude: location.lng,
-              zoom: 15,
-            }
-          });
-          this.props.setFindPlace(res.body.result);
-        }
-      );
+
+      (!item.lat && !item.lng ?
+        this.context.fetcher.place.find({
+          placeid: item.id
+        }).then(
+          (res) => {
+            const location = res.body.result.geometry.location;
+            return {
+              ...res.body.result,
+              ...location,
+              image: '/images/no-image-place.png',
+              link: res.url,
+              position: [res.lng, res.lat, 0]
+            };
+          }
+        )
+      :
+        Promise.resolve(item)
+      ).then((place) => {
+        this.setState({
+          mapViewState: {
+            ...this.state.mapViewState,
+            latitude: place.lat,
+            longitude: place.lng,
+            zoom: 15,
+          }
+        });
+        this.props.setFindPlace(place);
+      });
     }
   }
 
@@ -181,11 +219,21 @@ class Home extends Component {
       <div className={styles.container}>
         <FindPlace
           suggests={this.props.suggests}
+          onFocus={this.onFocusPlaceFinder}
+          onBlur={this.onBlurPlaceFinder}
           onChange={this.onChangePlace}
           onSelect={this.onSelectPlace}
           onClickCurrentPlace={this.onClickCurrentPlace}
           trace={this.props.trace}
         />
+        {
+          !this.state.focused ?
+            <FavoriteFilter
+              filtered={this.props.filtered}
+              onClickFilter={this.onClickFilter}
+            />
+          : ''
+        }
         <WorldMap
           ref={(elem) => { this.worldMap = elem; }}
           mapViewState={this.state.mapViewState}
@@ -232,6 +280,8 @@ Home.propTypes = {
   trace: PropTypes.bool.isRequired,
   authed: PropTypes.bool.isRequired,
   user: PropTypes.object.isRequired,
+  filtered: PropTypes.bool.isRequired,
+  toggleFilter: PropTypes.func.isRequired,
 };
 
 Home.defaultProps = {
@@ -250,6 +300,7 @@ const connected = connect(
     place: state.place.item,
     current: state.place.current,
     trace: state.place.trace,
+    filtered: state.place.filtered,
     authed: state.user.authed,
     user: state.user.item,
   }),
@@ -261,7 +312,8 @@ const connected = connect(
     setFindPlace,
     setPlaces,
     enableTrace,
-    disableTrace
+    disableTrace,
+    toggleFilter,
   }
 )(Home);
 

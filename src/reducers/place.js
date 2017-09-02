@@ -11,6 +11,7 @@ const INITIALIZED = 'place/INITIALIZED';
 const REFRESH = 'place/REFRESH';
 const ENABLE_TRACE = 'place/ENABLE_TRACE';
 const DISABLE_TRACE = 'place/DISABLE_TRACE';
+const TOGGLE_FILTER = 'place/TOGGLE_FILTER';
 
 const initialState = {
   current: {},
@@ -20,6 +21,7 @@ const initialState = {
   loaded: false,
   loading: false,
   trace: true,
+  filtered: false,
 };
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
@@ -31,6 +33,11 @@ export default function reducer(state = initialState, action = {}) {
     case REFRESH:
       return {
         ...state,
+      };
+    case TOGGLE_FILTER:
+      return {
+        ...state,
+        filtered: !state.filtered,
       };
     case GETS_START:
       return {
@@ -87,18 +94,13 @@ export default function reducer(state = initialState, action = {}) {
         }
       };
     case SET_FIND_PLACE: {
-      const res = action.item;
-      const location = res.geometry.location;
       return {
         ...state,
         loading: false,
         loaded: true,
         item: {
-          id: res.id,
-          name: res.name,
-          image: '/images/no-image-place.png',
-          link: res.url,
-          position: [location.lng, location.lat, 0]
+          ...action.item,
+          favorite: false
         }
       };
     }
@@ -160,5 +162,11 @@ export function enableTrace() {
 export function disableTrace() {
   return {
     type: DISABLE_TRACE
+  };
+}
+
+export function toggleFilter() {
+  return {
+    type: TOGGLE_FILTER
   };
 }

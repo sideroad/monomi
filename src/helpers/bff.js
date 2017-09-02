@@ -132,8 +132,7 @@ export default function ({ app }) {
         .then(response =>
           response.body.items.map(item => ({
             ...item,
-            type: PLACE,
-            image: '/images/pin.png'
+            type: PLACE
           }))
         ),
       request
@@ -147,12 +146,12 @@ export default function ({ app }) {
             id: prediction.place_id,
             name: prediction.terms.map(term => term.value).join(', '),
             type: PLACE,
-            image: '/images/pin.png'
+            image: '/images/pin.png',
           }))
         ),
-    ]).then(([tags, places]) => {
+    ]).then(([tags, places, autocompletes]) => {
       res.json({
-        items: tags.concat(places).slice(0, 10)
+        items: tags.concat(places).concat(autocompletes).slice(0, 10)
       });
     }, err => console.log(err));
   });
