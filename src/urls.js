@@ -3,12 +3,10 @@ import config from './config';
 export default {
   place: {
     gets: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/places',
+      url: '/apis/places',
       method: 'GET',
-      cache: {
-        client: true,
-        server: true,
-      }
+      mode: 'cors',
+      credentials: 'include'
     },
     get: {
       url: 'https://chaus.herokuapp.com/apis/monomi/places/:id',
@@ -43,6 +41,26 @@ export default {
         client: true,
         server: true,
       }
+    }
+  },
+  user: {
+    post: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/users',
+      method: 'POST'
+    }
+  },
+  favorite: {
+    add: {
+      url: `${config.app.base}/apis/favorites`,
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+    },
+    remove: {
+      url: `${config.app.base}/apis/favorites`,
+      method: 'DELETE',
+      mode: 'cors',
+      credentials: 'include',
     }
   }
 };

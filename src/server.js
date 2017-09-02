@@ -3,10 +3,7 @@ import favicon from 'serve-favicon';
 import compression from 'compression';
 import path from 'path';
 import http from 'http';
-import { server } from 'koiki';
-import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
-import expressSession from 'express-session';
+import { server, passporter } from 'koiki';
 import PrettyError from 'pretty-error';
 import 'isomorphic-fetch';
 import config from './config';
@@ -23,10 +20,7 @@ app.use(compression());
 app.use(favicon(path.join(__dirname, '..', 'static', 'images', 'favicon.png')));
 
 app.use(Express.static(path.join(__dirname, '..', 'static')));
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(expressSession({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+passporter.use({ facebook: config.facebook }, app, config.app.base);
 
 bff({
   app

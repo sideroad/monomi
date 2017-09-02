@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 const styles = require('../css/place.less');
+const ui = {
+  // eslint-disable-next-line global-require
+  fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
+};
 
 class Place extends Component {
   constructor(props) {
@@ -29,25 +33,44 @@ class Place extends Component {
 
   render() {
     return (
-      <a
+      <div
         ref={(elem) => { this.dom = elem; }}
         className={`${styles.place} ${this.state.animating ? styles.animate : ''}`}
-        href={this.props.link}
-        rel="noopener noreferrer"
-        target="_blank"
       >
-        <div
-          className={styles.image}
-          style={{
-            backgroundImage: `url(${this.props.image})`
-          }}
-        />
-        <div
-          className={styles.name}
+        <a
+          className={styles.left}
+          href={this.props.link}
+          rel="noopener noreferrer"
+          target="_blank"
         >
-          {this.props.name}
+          <div
+            className={styles.image}
+            style={{
+              backgroundImage: `url(${this.props.image})`
+            }}
+          />
+        </a>
+        <div className={styles.right}>
+          <a
+            className={styles.name}
+            href={this.props.link}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {this.props.name}
+          </a>
+          <div
+            className={styles.control}
+          >
+            <button
+              className={styles.favorite}
+              onClick={this.props.onClickFavorite}
+            >
+              <i className={`${ui.fa.fa} ${ui.fa[this.props.favorite ? 'fa-heart' : 'fa-heart-o']}`} />
+            </button>
+          </div>
         </div>
-      </a>
+      </div>
     );
   }
 }
@@ -56,6 +79,8 @@ Place.propTypes = {
   image: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   link: PropTypes.string.isRequired,
+  onClickFavorite: PropTypes.func.isRequired,
+  favorite: PropTypes.bool.isRequired,
 };
 
 export default Place;

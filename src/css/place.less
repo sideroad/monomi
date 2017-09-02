@@ -8,13 +8,17 @@
   bottom: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.3);
-  color: @ama;
   outline: none;
 }
 
 .animate {
   animation: card-flip 0.3s ease-out;
   animation-fill-mode: forwards;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
 }
 
 .image{
@@ -26,17 +30,31 @@
 }
 
 .name{
-  width: 100vw;
+  color: @ama;
   padding-left: 1em;
   display: flex;
-  font-size: 2em;
+  font-size: 1.5em;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   white-space: nowrap;
-  margin-right: -100px;
+  height: 50px;
+}
+
+.control {
+  height: 50px;
+  padding-left: 1em;
+  display: flex;
+}
+
+.favorite {
+  font-size: 1.5em;
+  color: @maso;
+  outline: none;
+  background: none;
+  border: none;
 }
 
 @keyframes card-flip {

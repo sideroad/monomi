@@ -31,6 +31,10 @@ module.exports = Object.assign({
   mapbox: {
     token: process.env.KOIKI_MONOMI_MAPBOX_TOKEN,
   },
+  facebook: {
+    appId: process.env.MONOMI_FACEBOOK_CLIENT_ID,
+    secret: process.env.MONOMI_FACEBOOK_SECRET_ID,
+  },
   app: {
     base,
     host: appHost,

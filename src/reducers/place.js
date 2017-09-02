@@ -42,12 +42,7 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         loading: false,
         loaded: true,
-        items: action.res.body.items.map(item => ({
-          ...item,
-          color: [44, 169, 225],
-          radius: 1,
-          position: [item.lng, item.lat, 0]
-        }))
+        items: action.res.body.items
       };
     case GETS_FAIL:
       return {
@@ -71,19 +66,17 @@ export default function reducer(state = initialState, action = {}) {
     case SET_PLACE:
       return {
         ...state,
-        item: action.item
+        item: action.item,
+        items: state.items.map(item =>
+          (action.item.id === item.id ? action.item : item)
+        )
       };
     case SET_PLACES:
       return {
         ...state,
         loading: false,
         loaded: true,
-        items: action.items.map(item => ({
-          ...item,
-          color: [44, 169, 225],
-          radius: 1,
-          position: [item.lng, item.lat, 0]
-        }))
+        items: action.items
       };
     case SET_CURRENT_PLACE:
       return {

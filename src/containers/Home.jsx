@@ -40,6 +40,11 @@ class Home extends Component {
     this.context.fetcher.place.gets({
       limit: 100000
     });
+    if (this.props.authed) {
+      this.context.fetcher.user.post({
+        facebook: this.props.user.id
+      });
+    }
     window.addEventListener('resize', () => this.onResize());
     watchLocation(this.syncLocation);
   }
@@ -67,29 +72,43 @@ class Home extends Component {
     this.props.enableTrace();
   }
 
+  onClickFavorite() {
+    let promise;
+    if (!this.props.place.favorite) {
+      promise = this.context.fetcher.favorite.add({
+        place: this.props.place.id
+      });
+    } else {
+      promise = this.context.fetcher.favorite.remove({
+        place: this.props.place.id
+      });
+    }
+    promise
+      .then(() =>
+        this.props.setPlace({
+          ...this.props.place,
+          favorite: !this.props.place.favorite,
+          color: !this.props.place.favorite ? [236, 109, 113] : [44, 169, 225]
+        })
+      );
+
+  }
+
   onSelectPlace(item) {
     if (item.type === TAG) {
-      this.context.fetcher.tagging.gets({
+      this.context.fetcher.place.gets({
         tag: item.id
       }).then((res) => {
-        Promise.all(
-          res.body.items.map(tagging =>
-            this.context.fetcher.place.get({
-              id: tagging.place.id
-            })
-            .then(json => json.body)
-          )
-        ).then((places) => {
-          const calcedViewState = calcLocation(places);
-          this.setState({
-            mapViewState: {
-              ...this.state.mapViewState,
-              ...calcedViewState
-            }
-          });
-          this.props.setPlaces(places);
-          this.props.setPlace(calcedViewState.place);
+        const places = res.body.items;
+        const calcedViewState = calcLocation(places);
+        this.setState({
+          mapViewState: {
+            ...this.state.mapViewState,
+            ...calcedViewState
+          }
         });
+        this.props.setPlaces(places);
+        this.props.setPlace(calcedViewState.place);
       });
     } else {
       this.context.fetcher.place.gets({
@@ -186,6 +205,8 @@ class Home extends Component {
               name={this.props.place.name}
               image={this.props.place.image}
               link={this.props.place.link}
+              favorite={this.props.place.favorite}
+              onClickFavorite={this.onClickFavorite}
             />
           : null
         }
@@ -209,6 +230,8 @@ Home.propTypes = {
   enableTrace: PropTypes.func.isRequired,
   disableTrace: PropTypes.func.isRequired,
   trace: PropTypes.bool.isRequired,
+  authed: PropTypes.bool.isRequired,
+  user: PropTypes.object.isRequired,
 };
 
 Home.defaultProps = {
@@ -227,6 +250,8 @@ const connected = connect(
     place: state.place.item,
     current: state.place.current,
     trace: state.place.trace,
+    authed: state.user.authed,
+    user: state.user.item,
   }),
   {
     placeInitialized,
