@@ -2,6 +2,12 @@ import config from './config';
 
 export default {
   place: {
+    post: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/places',
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include'
+    },
     gets: {
       url: '/apis/places',
       method: 'GET',

@@ -67,11 +67,7 @@ export default function ({ app }) {
           .get('https://chaus.herokuapp.com/apis/monomi/places?limit=100000')
           .then(response => response.body.items),
       request
-        .get('https://chaus.herokuapp.com/apis/monomi/favorites')
-        .send({
-          user: req.user.id,
-          limit: 1000
-        })
+        .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&limit=1000`)
         .then(response => response.body.items.map(item => item.place.id)),
     ]).then(([places, favorites]) => {
       res.json({
@@ -88,11 +84,7 @@ export default function ({ app }) {
   app.get('/apis/suggests', (req, res) => {
     Promise.all([
       request
-        .get('https://chaus.herokuapp.com/apis/monomi/tags')
-        .send({
-          name: `*${req.query.input}*`,
-          limit: 1000
-        })
+        .get(`https://chaus.herokuapp.com/apis/monomi/tags?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
         .then(response =>
           response.body.items.map(item => ({
             ...item,
@@ -103,11 +95,7 @@ export default function ({ app }) {
         .then(tags =>
           Promise.all(tags.map(tag =>
             request
-              .get('https://chaus.herokuapp.com/apis/monomi/taggings')
-              .send({
-                tag: tag.id,
-                limit: 1
-              })
+              .get(`https://chaus.herokuapp.com/apis/monomi/taggings?tag=${tag.id}&limit=1`)
               .then(response => ({
                 ...tag,
                 count: response.body.size
@@ -124,11 +112,7 @@ export default function ({ app }) {
             .filter(tag => tag.count >= 10)
         ),
       request
-        .get('https://chaus.herokuapp.com/apis/monomi/places')
-        .send({
-          name: `*${req.query.input}*`,
-          limit: 1000
-        })
+        .get(`https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
         .then(response =>
           response.body.items.map(item => ({
             ...item,

@@ -120,6 +120,7 @@ class Home extends Component {
   }
 
   onSelectPlace(item) {
+    this.props.disableTrace();
     if (item.type === TAG) {
       this.context.fetcher.place.gets({
         tag: item.id
@@ -150,11 +151,16 @@ class Home extends Component {
               ...res.body.result,
               ...location,
               image: '/images/no-image-place.png',
-              link: res.url,
-              position: [res.lng, res.lat, 0]
+              link: res.body.result.url
             };
           }
-        )
+        ).then(place =>
+          this.context.fetcher.place.post(place)
+        ).then(res =>
+          this.context.fetcher.place.get({
+            id: res.body.id
+          }))
+        .then(res => res.body)
       :
         Promise.resolve(item)
       ).then((place) => {
