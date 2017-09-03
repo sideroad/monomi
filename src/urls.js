@@ -15,19 +15,17 @@ export default {
       credentials: 'include'
     },
     get: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/places/:id',
+      url: `${config.app.base}/apis/places/:id`,
       method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
       cache: {
         server: true,
       }
     },
     find: {
-      url: `${config.app.base}/bff/google/maps/api/place/details/json`,
+      url: `${config.app.base}/apis/find`,
       method: 'GET',
-      defaults: {
-        key: config.googleapis.key,
-        language: 'en'
-      },
       cache: {
         client: true
       }

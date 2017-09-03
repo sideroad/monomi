@@ -2023,9 +2023,9 @@ decamelize@^1.0.0, decamelize@^1.1.1, decamelize@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-deck.gl@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.1.0.tgz#8c9ee434a486c854ffa55891f2316b19f7bcc28c"
+deck.gl@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.1.2.tgz#079b1d4f48f2457f87cd31597bb5d42e59db6929"
   dependencies:
     d3-hexbin "^0.2.1"
     earcut "^2.0.6"
@@ -4518,9 +4518,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.1.tgz#a8126630cbc0c5dfc10cf4989fcc857113f3828a"
+luma.gl@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.2.tgz#33a0de64164f722b81ade6f318f04a85ecc5a19f"
   dependencies:
     gl-constants "^1.0.0"
     gl-mat4 "^1.1.4"

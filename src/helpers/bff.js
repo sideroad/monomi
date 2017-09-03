@@ -58,6 +58,61 @@ export default function ({ app }) {
         res.json({});
       });
   });
+  app.get('/apis/find', (req, res) => {
+    request
+      .get(`https://${config.googleapis.host}/maps/api/place/details/json?key=${config.googleapis.key}&placeid=${req.query.placeid}`)
+      .set({
+        ...req.headers,
+        Host: config.googleapis.host
+      })
+      .then((response) => {
+        const location = response.body.result.geometry.location;
+        return {
+          ...response.body.result,
+          ...location,
+          image: '/images/no-image-place.png',
+          link: response.body.result.url
+        };
+      }).then(place =>
+        request
+          .post('https://chaus.herokuapp.com/apis/monomi/places')
+          .send(place)
+          .then(
+            response =>
+              request
+                .get(`https://chaus.herokuapp.com/apis/monomi/places/${response.body.id}`)
+                .then(json => json.body),
+            () =>
+              request
+                .get(`https://chaus.herokuapp.com/apis/monomi/places?name=${encodeURIComponent(place.name)}`)
+                .then(json => json.body.items[0])
+          )
+      )
+      .then(place =>
+        request
+          .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${place.id}limit=1000`)
+          .then(json => res.json({
+            ...place,
+            favorite: !!json.body.items.length
+          }))
+      );
+  });
+  app.get('/apis/places/:id', (req, res) => {
+    Promise.all([
+      request
+        .get(`https://chaus.herokuapp.com/apis/monomi/places/${req.params.id}`)
+        .then(response => response.body),
+      request
+        .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${req.params.id}`)
+        .then(response => response.body.items.map(favorite => favorite.place.id))
+    ]).then(([place, favorites]) => {
+      res.json({
+        ...place,
+        color: favorites.includes(place.id) ? [236, 109, 113] : [44, 169, 225],
+        favorite: favorites.includes(place.id),
+      });
+    });
+  });
   app.get('/apis/places', (req, res) => {
     Promise.all([
       req.query.tag ?

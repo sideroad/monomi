@@ -25,7 +25,8 @@ class WorldMap extends Component {
             .map(item => ({
               ...item,
               color: [230, 230, 230],
-              radius: 1
+              radius: 1,
+              position: [item.lng, item.lat, 0]
             }))
           )
           .concat([this.props.current]

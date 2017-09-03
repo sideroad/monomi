@@ -95,17 +95,12 @@ export default function reducer(state = initialState, action = {}) {
       };
     case SET_FIND_PLACE: {
       const exists = state.items.filter(item => item.id === action.item.id).length;
-      const item = {
-        ...action.item,
-        position: [action.item.lng, action.item.lat, 0],
-        favorite: false
-      };
       return {
         ...state,
         loading: false,
         loaded: true,
-        item,
-        items: exists ? state.items : state.items.concat([item])
+        item: action.item,
+        items: exists ? state.items : state.items.concat([action.item])
       };
     }
     case ENABLE_TRACE:

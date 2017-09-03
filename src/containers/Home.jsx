@@ -137,32 +137,14 @@ class Home extends Component {
         this.props.setPlace(calcedViewState.place);
       });
     } else {
-      this.context.fetcher.place.gets({
-        limit: 100000
-      });
-
       (!item.lat && !item.lng ?
         this.context.fetcher.place.find({
           placeid: item.id
-        }).then(
-          (res) => {
-            const location = res.body.result.geometry.location;
-            return {
-              ...res.body.result,
-              ...location,
-              image: '/images/no-image-place.png',
-              link: res.body.result.url
-            };
-          }
-        ).then(place =>
-          this.context.fetcher.place.post(place)
-        ).then(res =>
-          this.context.fetcher.place.get({
-            id: res.body.id
-          }))
-        .then(res => res.body)
+        }).then(res => res.body)
       :
-        Promise.resolve(item)
+        this.context.fetcher.place.get({
+          id: item.id
+        }).then(res => res.body)
       ).then((place) => {
         this.setState({
           mapViewState: {
