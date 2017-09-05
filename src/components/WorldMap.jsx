@@ -42,7 +42,7 @@ class WorldMap extends Component {
         strokeWidth: 2,
         pickable: true,
         radiusScale: 25,
-        radiusMinPixels: 10,
+        radiusMinPixels: 3,
         radiusMaxPixels: 15,
       }),
     ];
