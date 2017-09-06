@@ -86,7 +86,7 @@ class Home extends Component {
     this.props.enableTrace();
   }
 
-  onClickFilter() {
+  onClickFavoriteFilter() {
     this.props.toggleFilter();
   }
 
@@ -226,7 +226,7 @@ class Home extends Component {
           !this.state.focused ?
             <FavoriteFilter
               filtered={this.props.filtered}
-              onClickFilter={this.onClickFilter}
+              onClickFilter={this.onClickFavoriteFilter}
             />
           : ''
         }

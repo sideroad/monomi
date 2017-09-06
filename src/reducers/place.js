@@ -35,6 +35,17 @@ const initialState = {
     }
   }
 };
+
+const filter = (filtered, items, bounds) => {
+  const targets = filtered ? items.filter(item => item.favorite) : items;
+  return targets.filter(item =>
+    item.lat >= bounds.ne.lat &&
+    item.lat <= bounds.sw.lat &&
+    item.lng >= bounds.ne.lng &&
+    item.lng <= bounds.sw.lng
+  );
+};
+
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
     case INITIALIZED:
@@ -48,16 +59,10 @@ export default function reducer(state = initialState, action = {}) {
       };
     case TOGGLE_FAVORITE_FILTER: {
       const filtered = !state.filtered;
-      const targets = filtered ? state.items.filter(item => item.favorite) : state.items;
       return {
         ...state,
         filtered,
-        targets: targets.filter(item =>
-          item.lat >= state.bounds.ne.lat &&
-          item.lat <= state.bounds.sw.lat &&
-          item.lng >= state.bounds.ne.lng &&
-          item.lng <= state.bounds.sw.lng
-        )
+        targets: filter(filtered, state.items, state.bounds)
       };
     }
     case GETS_START:
@@ -71,12 +76,7 @@ export default function reducer(state = initialState, action = {}) {
         loading: false,
         loaded: true,
         items: action.res.body.items,
-        targets: state.items.filter(item =>
-          item.lat >= state.bounds.ne.lat &&
-          item.lat <= state.bounds.sw.lat &&
-          item.lng >= state.bounds.ne.lng &&
-          item.lng <= state.bounds.sw.lng
-        )
+        targets: filter(state.filtered, action.res.body.items, state.bounds)
       };
     case GETS_FAIL:
       return {
@@ -97,26 +97,24 @@ export default function reducer(state = initialState, action = {}) {
         loaded: false,
         error: action.error
       };
-    case SET_PLACE:
+    case SET_PLACE: {
+      const items = state.items.map(item =>
+        (action.item.id === item.id ? action.item : item)
+      );
       return {
         ...state,
         item: action.item,
-        items: state.items.map(item =>
-          (action.item.id === item.id ? action.item : item)
-        )
+        items,
+        targets: filter(state.filtered, items, state.bounds),
       };
+    }
     case SET_PLACES:
       return {
         ...state,
         loading: false,
         loaded: true,
         items: action.items,
-        targets: state.items.filter(item =>
-          item.lat >= state.bounds.ne.lat &&
-          item.lat <= state.bounds.sw.lat &&
-          item.lng >= state.bounds.ne.lng &&
-          item.lng <= state.bounds.sw.lng
-        )
+        targets: filter(state.filtered, action.items, state.bounds),
       };
     case SET_CURRENT_PLACE:
       return {
@@ -135,12 +133,7 @@ export default function reducer(state = initialState, action = {}) {
         loaded: true,
         item: action.item,
         items,
-        targets: items.filter(item =>
-          item.lat >= state.bounds.ne.lat &&
-          item.lat <= state.bounds.sw.lat &&
-          item.lng >= state.bounds.ne.lng &&
-          item.lng <= state.bounds.sw.lng
-        )
+        targets: filter(state.filtered, items, state.bounds),
       };
     }
     case ENABLE_TRACE:
@@ -157,12 +150,7 @@ export default function reducer(state = initialState, action = {}) {
       return {
         ...state,
         bounds: action.bounds,
-        targets: state.items.filter(item =>
-          item.lat >= action.bounds.ne.lat &&
-          item.lat <= action.bounds.sw.lat &&
-          item.lng >= action.bounds.ne.lng &&
-          item.lng <= action.bounds.sw.lng
-        )
+        targets: filter(state.filtered, state.items, action.bounds),
       };
     default:
       return state;
