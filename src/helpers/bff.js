@@ -164,7 +164,7 @@ export default function ({ app }) {
               a.count > b.count ? -1 : 0
             ))
             .slice(0, 5)
-            .filter(tag => tag.count >= 10)
+            .filter(tag => tag.count >= 5)
         ),
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
