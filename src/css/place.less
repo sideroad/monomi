@@ -19,6 +19,7 @@
 .right {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .image{
@@ -29,18 +30,22 @@
   background-size: cover;
 }
 
-.name{
-  color: @ama;
-  padding-left: 1em;
+.title{
   display: flex;
-  font-size: 1.5em;
   overflow: hidden;
-  text-overflow: ellipsis;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  white-space: nowrap;
   height: 50px;
+  padding-left: 1em;
+}
+
+.name{
+  color: @ama;
+  font-size: 1.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .control {

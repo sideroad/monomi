@@ -9,8 +9,8 @@ import WorldMap from '../components/WorldMap';
 import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
-import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace, toggleFilter } from '../reducers/place';
-import { watch as watchLocation, get as getLocation, calc as calcLocation } from '../helpers/location';
+import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace, toggleFilter, setBounds } from '../reducers/place';
+import { watch as watchLocation, get as getLocation, calc as calcLocation, doubleBounds } from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -88,13 +88,6 @@ class Home extends Component {
 
   onClickFilter() {
     this.props.toggleFilter();
-    if (this.props.filtered) {
-      this.context.fetcher.place.gets({
-        limit: 100000
-      });
-    } else {
-      this.props.setPlaces(this.props.places.filter(place => place.favorite));
-    }
   }
 
   onClickFavorite() {
@@ -135,6 +128,7 @@ class Home extends Component {
         });
         this.props.setPlaces(places);
         this.props.setPlace(calcedViewState.place);
+        this.setBounds();
       });
     } else {
       (!item.lat && !item.lng ?
@@ -155,6 +149,7 @@ class Home extends Component {
           }
         });
         this.props.setFindPlace(place);
+        this.setBounds();
       });
     }
   }
@@ -169,12 +164,24 @@ class Home extends Component {
         pitch: mapViewState.pitch > 60 ? 60 : mapViewState.pitch
       }
     });
+
+    if (this.waitId) {
+      clearTimeout(this.waitId);
+    }
+    this.waitId = setTimeout(() => {
+      this.setBounds();
+    }, 500);
   }
 
   onLayerClick(info) {
     if (info) {
       this.props.setPlace(info.object);
     }
+  }
+
+  setBounds() {
+    const bounds = this.worldMap.mapgl.getMap().getBounds();
+    this.props.setBounds(doubleBounds(bounds));
   }
 
   syncLocation(location) {
@@ -190,6 +197,7 @@ class Home extends Component {
           longitude: location.lng,
         }
       });
+      this.setBounds();
     }
   }
 
@@ -270,6 +278,7 @@ Home.propTypes = {
   user: PropTypes.object.isRequired,
   filtered: PropTypes.bool.isRequired,
   toggleFilter: PropTypes.func.isRequired,
+  setBounds: PropTypes.func.isRequired,
 };
 
 Home.defaultProps = {
@@ -283,7 +292,7 @@ Home.contextTypes = {
 
 const connected = connect(
   state => ({
-    places: state.place.items,
+    places: state.place.targets,
     suggests: state.suggest.items,
     place: state.place.item,
     current: state.place.current,
@@ -302,6 +311,7 @@ const connected = connect(
     enableTrace,
     disableTrace,
     toggleFilter,
+    setBounds,
   }
 )(Home);
 

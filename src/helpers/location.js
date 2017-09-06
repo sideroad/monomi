@@ -44,8 +44,32 @@ const calc = (places) => {
   };
 };
 
+const doubleBounds = (bounds) => {
+  const diff = {
+    //eslint-disable-next-line no-underscore-dangle
+    lat: Number(bounds._ne.lat) - Number(bounds._sw.lat),
+    //eslint-disable-next-line no-underscore-dangle
+    lng: Number(bounds._ne.lng) - Number(bounds._sw.lng),
+  };
+  return {
+    ne: {
+      //eslint-disable-next-line no-underscore-dangle
+      lat: Number(bounds._sw.lat) - diff.lat,
+      //eslint-disable-next-line no-underscore-dangle
+      lng: Number(bounds._sw.lng) - diff.lng,
+    },
+    sw: {
+      //eslint-disable-next-line no-underscore-dangle
+      lat: Number(bounds._ne.lat) + diff.lat,
+      //eslint-disable-next-line no-underscore-dangle
+      lng: Number(bounds._ne.lng) + diff.lng,
+    }
+  };
+};
+
 export {
   watch,
   get,
-  calc
+  calc,
+  doubleBounds,
 };

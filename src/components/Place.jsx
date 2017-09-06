@@ -52,12 +52,14 @@ class Place extends Component {
         </a>
         <div className={styles.right}>
           <a
-            className={styles.name}
+            className={styles.title}
             href={this.props.link}
             rel="noopener noreferrer"
             target="_blank"
           >
-            {this.props.name}
+            <span className={styles.name}>
+              {this.props.name}
+            </span>
           </a>
           <div
             className={styles.control}

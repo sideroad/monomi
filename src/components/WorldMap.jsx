@@ -15,7 +15,6 @@ class WorldMap extends Component {
     if (__SERVER__) {
       return (<div />);
     }
-
     const layers = [
       new ScatterplotLayer({
         id: 'places',
