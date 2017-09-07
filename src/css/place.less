@@ -62,6 +62,16 @@
   border: none;
 }
 
+.on {
+  animation: flip 0.3s ease-out;
+  animation-fill-mode: forwards;
+}
+
+.off {
+  animation: flip-revert 0.3s ease-out;
+  animation-fill-mode: forwards;
+}
+
 @keyframes card-flip {
   0% {
     transform: scale3d(0.75, 0, 1);
@@ -75,4 +85,29 @@
   100% {
     transform: scale3d(1, 1, 1);
   }
+}
+
+
+@keyframes flip {
+  0% {
+		transform: rotateY(0deg);
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+	}
+}
+
+@keyframes flip-revert {
+  0% {
+		transform: rotateY(0deg);
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+	}
 }

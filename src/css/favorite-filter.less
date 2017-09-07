@@ -11,19 +11,16 @@
 }
 
 .filtered.favorite{
-  color: @gofun;
-  border-color: @maso;
-  background-color: @maso;
+  animation: flip 0.3s ease-out;
+  animation-fill-mode: forwards;
 }
 
 .favorite {
   color: @gofun;
-  border-color: @gofun;
   outline: none;
   background: none;
   height: 2.75em;
   border-style: solid;
-  border-color: #FFFFFC;
   border-radius: 3px;
   border-width: 2px;
   width: 2.75em;
@@ -31,8 +28,42 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: flip-revert 0.3s ease-out;
+  animation-fill-mode: forwards;
 }
 
 .favorite i {
   margin: auto;
+}
+
+@keyframes flip {
+  0% {
+		transform: rotateY(0deg);
+    border-color: @gofun;
+    background: none;
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+    border-color: @maso;
+    background-color: @maso;
+	}
+}
+
+@keyframes flip-revert {
+  0% {
+		transform: rotateY(0deg);
+    border-color: @maso;
+    background-color: @maso;
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+    border-color: @gofun;
+    background: none;
+	}
 }

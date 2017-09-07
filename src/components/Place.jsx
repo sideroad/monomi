@@ -65,7 +65,7 @@ class Place extends Component {
             className={styles.control}
           >
             <button
-              className={styles.favorite}
+              className={`${styles.favorite} ${this.props.favorite ? styles.on : styles.off}`}
               onClick={this.props.onClickFavorite}
             >
               <i className={`${ui.fa.fa} ${ui.fa[this.props.favorite ? 'fa-heart' : 'fa-heart-o']}`} />
