@@ -154,7 +154,7 @@ export default function ({ app }) {
               a.count > b.count ? -1 : 0
             ))
             .slice(0, 5)
-            .filter(tag => tag.count >= 10)
+            .filter(tag => tag.count >= 5)
         )
         .then(tags =>
           tags.map(item => ({
