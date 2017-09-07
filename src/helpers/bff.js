@@ -12,14 +12,10 @@ const getPlacesByTag = req =>
     })
     .then(response => response.body.items.map(item => item.place.id))
     .then(places =>
-      Promise.all(
-        places.map(place =>
-          request
-            .get(`https://chaus.herokuapp.com/apis/monomi/places/${place}`)
-        )
-      )
+      request
+        .get(`https://chaus.herokuapp.com/apis/monomi/places?id=${places.join(',')}`)
     )
-    .then(responses => responses.map(response => response.body));
+    .then(response => response.body.items);
 
 export default function ({ app }) {
   proxy({
@@ -140,13 +136,7 @@ export default function ({ app }) {
     Promise.all([
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/tags?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
-        .then(response =>
-          response.body.items.map(item => ({
-            ...item,
-            type: TAG,
-            image: '/images/tag.png'
-          }))
-        )
+        .then(response => response.body.items)
         .then(tags =>
           Promise.all(tags.map(tag =>
             request
@@ -165,6 +155,13 @@ export default function ({ app }) {
             ))
             .slice(0, 5)
             .filter(tag => tag.count >= 10)
+        )
+        .then(tags =>
+          tags.map(item => ({
+            ...item,
+            type: TAG,
+            image: '/images/tag.png'
+          }))
         ),
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)

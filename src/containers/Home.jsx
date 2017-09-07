@@ -77,9 +77,17 @@ class Home extends Component {
   }
 
   onChangePlace(input) {
-    this.context.fetcher.suggest.gets({
-      input
-    });
+    if (!input) {
+      return;
+    }
+    if (this.waitMapViewportId) {
+      clearTimeout(this.waitMapViewportId);
+    }
+    this.waitMapViewportId = setTimeout(() => {
+      this.context.fetcher.suggest.gets({
+        input
+      });
+    }, 250);
   }
 
   onClickCurrentPlace() {
@@ -165,10 +173,10 @@ class Home extends Component {
       }
     });
 
-    if (this.waitId) {
-      clearTimeout(this.waitId);
+    if (this.waitMapViewportId) {
+      clearTimeout(this.waitMapViewportId);
     }
-    this.waitId = setTimeout(() => {
+    this.waitMapViewportId = setTimeout(() => {
       this.setBounds();
     }, 500);
   }
