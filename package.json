@@ -19,6 +19,7 @@
     "dev": "koiki-dev"
   },
   "dependencies": {
+    "@mapbox/polyline": "^0.2.0",
     "async": "^2.0.1",
     "babel-polyfill": "^6.3.14",
     "bezier": "^0.1.0",

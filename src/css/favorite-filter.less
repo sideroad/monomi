@@ -2,7 +2,7 @@
 
 .filter {
   position: absolute;
-  right: 10%;
+  right: 50px;
   top: 5%;
   z-index: 1;
   display: flex;
@@ -66,4 +66,10 @@
     border-color: @gofun;
     background: none;
 	}
+}
+
+@media(max-width:768px) {
+  .filter {
+    right: 10%;
+  }
 }

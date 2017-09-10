@@ -5,7 +5,10 @@ import { push } from 'react-router-redux';
 import autoBind from 'react-autobind';
 // import update from 'immutability-helper';
 import FindPlace from '../components/FindPlace';
+import Itineraries from '../components/Itineraries';
+import Itinerary from '../components/Itinerary';
 import WorldMap from '../components/WorldMap';
+import SideBar from '../components/SideBar';
 import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
@@ -45,7 +48,12 @@ class Home extends Component {
     if (this.props.authed) {
       this.context.fetcher.user.post({
         facebook: this.props.user.id
-      });
+      }).then(
+        () => {},
+        () => {}
+      ).then(() =>
+        this.context.fetcher.itinerary.gets()
+      );
     }
     window.addEventListener('resize', () => this.onResize());
     watchLocation(this.syncLocation);
@@ -94,6 +102,12 @@ class Home extends Component {
     this.props.enableTrace();
   }
 
+  onClickItinerary(itinerary) {
+    this.context.fetcher.itinerary.get({
+      id: itinerary.id
+    });
+  }
+
   onClickFavoriteFilter() {
     this.props.toggleFilter();
   }
@@ -117,7 +131,17 @@ class Home extends Component {
           color: !this.props.place.favorite ? [236, 109, 113] : [44, 169, 225]
         })
       );
+  }
 
+  onClickAddPlan() {
+    this.context.fetcher.plan.add({
+      itinerary: this.props.itinerary.id,
+      place: this.props.place.id,
+    }).then(
+      () => this.context.fetcher.itinerary.get({
+        id: this.props.itinerary.id
+      })
+    );
   }
 
   onSelectPlace(item) {
@@ -187,6 +211,52 @@ class Home extends Component {
     }
   }
 
+  onAddItinerary(itinerary) {
+    this.context.fetcher.itinerary.add(itinerary)
+      .then(() =>
+        this.context.fetcher.itinerary.gets()
+      );
+  }
+
+  onClickPlanRemove(id) {
+    this.context.fetcher.plan.remove({
+      id
+    }).then(() =>
+      this.context.fetcher.itinerary.get({
+        id: this.props.itinerary.id
+      })
+    );
+  }
+
+  onClickPlanCommunication(id, communication) {
+    this.context.fetcher.plan.update({
+      id,
+      communication
+    }).then(() =>
+      this.context.fetcher.itinerary.get({
+        id: this.props.itinerary.id
+      })
+    );
+  }
+
+  onClickPlanPlace(place) {
+    this.props.disableTrace();
+    this.setState({
+      mapViewState: {
+        ...this.state.mapViewState,
+        latitude: place.lat,
+        longitude: place.lng,
+        zoom: 15,
+      }
+    });
+    this.context.fetcher.place.get({
+      id: place.id
+    }).then((res) => {
+      this.props.setFindPlace(res.body);
+      this.setBounds();
+    });
+  }
+
   setBounds() {
     const bounds = this.worldMap.mapgl.getMap().getBounds();
     this.props.setBounds(doubleBounds(bounds));
@@ -238,6 +308,23 @@ class Home extends Component {
             />
           : ''
         }
+        <SideBar icon="fa-book" closeClickedOutSide={false} >
+          {
+            this.props.openItinerary ?
+              <Itinerary
+                {...this.props.itinerary}
+                onClickPlace={this.onClickPlanPlace}
+                onClickRemove={this.onClickPlanRemove}
+                onClickCommunication={this.onClickPlanCommunication}
+              />
+            :
+              <Itineraries
+                itineraries={this.props.itineraries}
+                onClickItinerary={this.onClickItinerary}
+                onAddItinerary={this.onAddItinerary}
+              />
+          }
+        </SideBar>
         <WorldMap
           ref={(elem) => { this.worldMap = elem; }}
           mapViewState={this.state.mapViewState}
@@ -258,7 +345,9 @@ class Home extends Component {
               image={this.props.place.image}
               link={this.props.place.link}
               favorite={this.props.place.favorite}
+              showItinerary={this.props.openItinerary}
               onClickFavorite={this.onClickFavorite}
+              onClickAddPlan={this.onClickAddPlan}
             />
           : null
         }
@@ -287,6 +376,9 @@ Home.propTypes = {
   filtered: PropTypes.bool.isRequired,
   toggleFilter: PropTypes.func.isRequired,
   setBounds: PropTypes.func.isRequired,
+  itineraries: PropTypes.array.isRequired,
+  itinerary: PropTypes.object.isRequired,
+  openItinerary: PropTypes.bool.isRequired,
 };
 
 Home.defaultProps = {
@@ -308,6 +400,9 @@ const connected = connect(
     filtered: state.place.filtered,
     authed: state.user.authed,
     user: state.user.item,
+    itineraries: state.itinerary.items,
+    itinerary: state.itinerary.item,
+    openItinerary: state.itinerary.openItinerary,
   }),
   {
     placeInitialized,

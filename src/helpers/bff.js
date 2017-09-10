@@ -1,5 +1,7 @@
 import { proxy } from 'koiki';
 import request from 'superagent';
+import moment from 'moment';
+import polyline from '@mapbox/polyline';
 import config from '../config';
 import { TAG, PLACE } from '../reducers/suggest';
 
@@ -190,5 +192,114 @@ export default function ({ app }) {
         items: tags.concat(places).concat(autocompletes).slice(0, 10)
       });
     }, err => console.log(err));
+  });
+
+  app.get('/apis/itineraries', (req, res) => {
+    request
+      .get(`https://chaus.herokuapp.com/apis/monomi/itineraries?user=${req.user.id}`)
+      .then(response =>
+        res.json(response.body)
+      );
+  });
+
+  const getDirection = (req, from, to) =>
+    console.log(`https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${moment(from.start).add(from.sojourn, 'minutes').valueOf() / 1000}&mode=${from.communication.id}&key=${config.googleapis.key}`) ||
+    request
+      .get(`https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${moment(from.start).add(from.sojourn, 'minutes').valueOf() / 1000}&mode=${from.communication.id}&key=${config.googleapis.key}`)
+      .set({
+        ...req.headers,
+        Host: config.googleapis.host
+      })
+      .then(response => ({
+        direction: {
+          ...response.body,
+          points: polyline.decode(response.body.routes[0].overview_polyline.points)
+        },
+        nextStart: moment(from.start)
+                     .add(from.sojourn, 'minutes')
+                     .add(response.body.routes[0].legs[0].duration.value, 'seconds')
+                     .format()
+      }));
+
+  const applyStartTime = (req, next, plans = []) =>
+    new Promise((resolve) => {
+      const from = next.shift();
+      const to = next.shift();
+      if (from && to) {
+        getDirection(req, from, to)
+          .then(
+            ({ direction, nextStart }) => {
+              applyStartTime(req, [{
+                ...to,
+                start: nextStart
+              }].concat(next), plans.concat([{
+                ...from,
+                end: moment(from.start).add(from.sojourn, 'minutes').format(),
+                transit: Math.ceil(direction.routes[0].legs[0].duration.value / 60),
+                direction: {
+                  ...direction,
+                  page: `https://www.google.com/maps/dir/${from.place.lat},${from.place.lng}/${to.place.lat},${to.place.lng}/`
+                },
+              }]))
+                .then(res => resolve(res));
+            }
+          );
+      } else {
+        resolve(plans.concat([from]));
+      }
+    });
+
+  app.get('/apis/itineraries/:id', (req, res) => {
+    Promise.all([
+      request
+        .get(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
+        .then(response => response.body),
+      request
+        .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.params.id}`)
+        .then(response =>
+          Promise.all(response.body.items.map(plan =>
+            request
+              .get(`https://chaus.herokuapp.com/apis/monomi/places/${plan.place.id}`)
+              .then(json => ({
+                ...plan,
+                place: json.body
+              }))
+          ))),
+    ]).then(([itinerary, plans]) => {
+      applyStartTime(req, plans.map((plan, index) =>
+        (index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan)
+      ))
+        .then(plansWithDirection =>
+          res.json({
+            ...itinerary,
+            plans: plansWithDirection
+          })
+        );
+    });
+  });
+
+  app.post('/apis/itineraries', (req, res) => {
+    request
+      .post('https://chaus.herokuapp.com/apis/monomi/itineraries')
+      .send({
+        ...req.body,
+        user: req.user.id
+      })
+      .then(response =>
+        res.json(response.body)
+      );
+  });
+
+  app.post('/apis/plans', (req, res) => {
+    request
+      .post('https://chaus.herokuapp.com/apis/monomi/plans')
+      .send({
+        ...req.body,
+        sojourn: 15,
+        communication: 'walking',
+      })
+      .then(response =>
+        res.json(response.body)
+      );
   });
 }

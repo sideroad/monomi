@@ -1,3 +1,4 @@
+import itinerary from './itinerary';
 import tag from './tag';
 import transaction from './transaction';
 import suggest from './suggest';
@@ -9,5 +10,6 @@ export default {
   place,
   transaction,
   tag,
-  user
+  user,
+  itinerary
 };

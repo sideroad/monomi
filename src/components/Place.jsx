@@ -11,7 +11,7 @@ class Place extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      animating: true
+      animating: true,
     };
   }
 
@@ -70,6 +70,16 @@ class Place extends Component {
             >
               <i className={`${ui.fa.fa} ${ui.fa[this.props.favorite ? 'fa-heart' : 'fa-heart-o']}`} />
             </button>
+            {
+              this.props.showItinerary ?
+                <button
+                  className={styles.itinerary}
+                  onClick={this.props.onClickAddPlan}
+                >
+                  <i className={`${ui.fa.fa} ${ui.fa['fa-book']}`} />
+                </button>
+              : ''
+            }
           </div>
         </div>
       </div>
@@ -82,7 +92,9 @@ Place.propTypes = {
   name: PropTypes.string.isRequired,
   link: PropTypes.string.isRequired,
   onClickFavorite: PropTypes.func.isRequired,
+  onClickAddPlan: PropTypes.func.isRequired,
   favorite: PropTypes.bool.isRequired,
+  showItinerary: PropTypes.bool.isRequired,
 };
 
 export default Place;

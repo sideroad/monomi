@@ -1,19 +1,26 @@
 @import "variables.less";
 
-.logo,
+.opener,
 .closeButton {
   position: absolute;
-  right: 5%;
-  top: 25px;
+  right: 50px;
+  bottom: 5%;
   z-index: 1;
   background-size: cover;
   background-position: center;
   background-color: initial;
-  border: none;
+  border-radius: 3px;
+  color: @gofun;
+  font-size: 1em;
   outline: none;
 }
-.logo {
-  background-image: url(../images/logo.png);
+
+.closeButton {
+  font-size: 3em;
+  border: none;
+}
+.opener {
+  border: 2px solid @gofun;
   width: 3.45em;
   height: 3.45em;
   &.open {
@@ -35,13 +42,13 @@
   top: 0;
   width: 30%;
   height: 100%;
-  font-family: 'Tangerine';
+  font-family: 'Ubuntu';
   transition-duration: 0.2s;
   transition-property: right;
   z-index: 1;
   background-color: @sumi;
   color: @gofun;
-  padding-top: 25px;
+  overflow: scroll;
   &.open {
     right: 0;
     box-shadow: @shadow;
@@ -156,5 +163,9 @@
     &.close {
       right: -100%;
     }
+  }
+  .opener,
+  .closeButton {
+    right: 10%;
   }
 }

@@ -66,5 +66,45 @@ export default {
       mode: 'cors',
       credentials: 'include',
     }
+  },
+  itinerary: {
+    gets: {
+      url: `${config.app.base}/apis/itineraries`,
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+    },
+    get: {
+      url: `${config.app.base}/apis/itineraries/:id`,
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+    },
+    add: {
+      url: `${config.app.base}/apis/itineraries`,
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+    }
+  },
+  plan: {
+    add: {
+      url: `${config.app.base}/apis/plans`,
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+    },
+    remove: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/plans/:id',
+      method: 'DELETE',
+      mode: 'cors',
+      credentials: 'include',
+    },
+    update: {
+      url: 'https://chaus.herokuapp.com/apis/monomi/plans/:id',
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+    }
   }
 };
