@@ -44,7 +44,8 @@ const SortableItem = SortableElement(({
         </button>
         <div className={styles.control}>
           <div className={styles.sojourn}>
-            ({humanize(plan.sojourn)})
+            <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
+            {humanize(plan.sojourn)}
           </div>
           <button
             className={styles.remove}
@@ -75,6 +76,7 @@ const SortableItem = SortableElement(({
           >
             {humanize(plan.transit)}
           </a>
+          <div className={styles.dashed} />
         </div>
       : ''
     }
