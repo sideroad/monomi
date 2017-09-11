@@ -15,10 +15,22 @@
 
 .list {
   list-style: none;
+  overflow: auto;
+  height: 100vh;
+  padding: 0 30px;
 }
 
 .item {
+  list-style: none;
+  height: 9em;
+  z-index: 3;
+  color: @gofun;
+  font-family: 'Ubuntu';
+}
 
+.dragging {
+  opacity: 0.8;
+  background-color: @hai;
 }
 
 .time{

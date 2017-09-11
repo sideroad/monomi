@@ -105,6 +105,12 @@ export default {
       method: 'POST',
       mode: 'cors',
       credentials: 'include',
+    },
+    replaces: {
+      url: `${config.app.base}/apis/itineraries/:id/plans`,
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
     }
   }
 };

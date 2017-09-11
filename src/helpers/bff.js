@@ -3,6 +3,7 @@ import request from 'superagent';
 import moment from 'moment';
 import polyline from '@mapbox/polyline';
 import config from '../config';
+import { mapSeries } from '../helpers/async-promise';
 import { TAG, PLACE } from '../reducers/suggest';
 
 const getPlacesByTag = req =>
@@ -255,7 +256,7 @@ export default function ({ app }) {
         .get(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
         .then(response => response.body),
       request
-        .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.params.id}`)
+        .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.params.id}&limit=1000`)
         .then(response =>
           Promise.all(response.body.items.map(plan =>
             request
@@ -266,7 +267,10 @@ export default function ({ app }) {
               }))
           ))),
     ]).then(([itinerary, plans]) => {
-      applyStartTime(req, plans.map((plan, index) =>
+      applyStartTime(req, plans.sort((a, b) => (
+        a.order < b.order ? -1 :
+        a.order > b.order ? 1 : 0
+      )).map((plan, index) =>
         (index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan)
       ))
         .then(plansWithDirection =>
@@ -292,14 +296,38 @@ export default function ({ app }) {
 
   app.post('/apis/plans', (req, res) => {
     request
-      .post('https://chaus.herokuapp.com/apis/monomi/plans')
-      .send({
-        ...req.body,
-        sojourn: 15,
-        communication: 'walking',
-      })
-      .then(response =>
-        res.json(response.body)
+      .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.body.itinerary}&limit=1000`)
+      .then(response => (response.body.items.sort((a, b) => (
+        a.order < b.order ? 1 :
+        a.order > b.order ? -1 : 0
+      ))[0] || { order: 0 }).order + 1)
+      .then(order =>
+        request
+          .post('https://chaus.herokuapp.com/apis/monomi/plans')
+          .send({
+            ...req.body,
+            sojourn: 15,
+            communication: 'walking',
+            order,
+          })
+          .then(response =>
+            res.json(response.body)
+          )
       );
+  });
+
+  app.post('/apis/itineraries/:id/plans', (req, res) => {
+    mapSeries({
+      args: req.body.items,
+      fn: plan =>
+        request
+          .post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`)
+          .send({
+            ...plan,
+            itinerary: req.params.id,
+          }),
+    }).then(() =>
+      res.json({})
+    );
   });
 }

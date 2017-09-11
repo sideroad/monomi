@@ -257,6 +257,24 @@ class Home extends Component {
     });
   }
 
+  onReplacePlans(id, items) {
+    this.context.fetcher.plan.replaces({
+      id,
+      items: items.map(item => ({
+        id: item.id,
+        itinerary: item.itinerary.id,
+        place: item.place.id,
+        sojourn: item.sojourn,
+        communication: item.communication.id,
+        order: item.order,
+      }))
+    }).then(() =>
+      this.context.fetcher.itinerary.get({
+        id: this.props.itinerary.id
+      })
+    );
+  }
+
   setBounds() {
     const bounds = this.worldMap.mapgl.getMap().getBounds();
     this.props.setBounds(doubleBounds(bounds));
@@ -316,6 +334,7 @@ class Home extends Component {
                 onClickPlace={this.onClickPlanPlace}
                 onClickRemove={this.onClickPlanRemove}
                 onClickCommunication={this.onClickPlanCommunication}
+                onReplace={this.onReplacePlans}
               />
             :
               <Itineraries
