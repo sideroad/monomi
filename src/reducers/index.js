@@ -1,3 +1,4 @@
+import plan from './plan';
 import itinerary from './itinerary';
 import tag from './tag';
 import transaction from './transaction';
@@ -11,5 +12,6 @@ export default {
   transaction,
   tag,
   user,
-  itinerary
+  itinerary,
+  plan
 };

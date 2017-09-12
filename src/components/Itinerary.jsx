@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import autoBind from 'react-autobind';
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
-import humanize from '../helpers/time';
+import { stringify } from '../helpers/time';
+import TimeControl from '../components/TimeControl';
 
 const ui = {
   // eslint-disable-next-line global-require
@@ -26,7 +27,9 @@ const SortableItem = SortableElement(({
   plan,
   onClickPlace,
   onClickRemove,
-  onClickCommunication
+  onClickCommunication,
+  onClickSojourn,
+  onChangeSojourn,
 }) =>
   <li key={plan.id} className={styles.item}>
     <div className={styles.place} >
@@ -43,10 +46,21 @@ const SortableItem = SortableElement(({
           {plan.place.name}
         </button>
         <div className={styles.control}>
-          <div className={styles.sojourn}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
-            {humanize(plan.sojourn)}
-          </div>
+          {
+            plan.changingSojourn ?
+              <TimeControl
+                min={plan.sojourn}
+                onSubmit={min => onChangeSojourn(plan, min)}
+              />
+            :
+              <button
+                className={styles.sojourn}
+                onClick={() => onClickSojourn(plan)}
+              >
+                <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
+                {stringify(plan.sojourn)}
+              </button>
+          }
           <button
             className={styles.remove}
             onClick={() => onClickRemove(plan.id)}
@@ -74,7 +88,7 @@ const SortableItem = SortableElement(({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {humanize(plan.transit)}
+            {stringify(plan.transit)}
           </a>
           <div className={styles.dashed} />
         </div>
@@ -87,7 +101,9 @@ const SortableList = SortableContainer(({
   plans,
   onClickPlace,
   onClickRemove,
-  onClickCommunication
+  onClickCommunication,
+  onClickSojourn,
+  onChangeSojourn,
 }) =>
   <ul className={styles.list}>
     {plans.map((plan, index) => (
@@ -98,6 +114,8 @@ const SortableList = SortableContainer(({
         onClickRemove={onClickRemove}
         onClickPlace={onClickPlace}
         onClickCommunication={onClickCommunication}
+        onClickSojourn={onClickSojourn}
+        onChangeSojourn={onChangeSojourn}
       />
     ))}
   </ul>);
@@ -115,6 +133,31 @@ class Itinerary extends Component {
     this.setState({
       plans: nextProps.plans
     });
+  }
+
+  onClickSojourn(plan) {
+    const plans = this.state.plans.slice(0).map(item => ({
+      ...item,
+      changingSojourn: plan.id === item.id
+    }));
+    this.setState({
+      plans
+    });
+  }
+
+  onChangeSojourn(plan, min) {
+    const plans = this.state.plans.slice(0).map(item => ({
+      ...item,
+      sojourn: plan.id === item.id ? min : item.sojourn
+    }));
+    this.setState({
+      plans,
+      changingSojourn: false,
+    });
+    this.props.onReplace(
+      this.props.id,
+      plans.filter(item => item.id === plan.id)
+    );
   }
 
   onSortEnd({ oldIndex, newIndex }) {
@@ -157,6 +200,8 @@ class Itinerary extends Component {
           onClickRemove={this.props.onClickRemove}
           onClickPlace={this.props.onClickPlace}
           onClickCommunication={this.props.onClickCommunication}
+          onClickSojourn={this.onClickSojourn}
+          onChangeSojourn={this.onChangeSojourn}
         />
       </div>
     );
