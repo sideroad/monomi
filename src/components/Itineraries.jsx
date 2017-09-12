@@ -49,10 +49,10 @@ class Itineraries extends Component {
     });
   }
 
-  onSelectItineraryDate(date) {
+  onSelectItineraryDate(start) {
     this.props.onAddItinerary({
       name: this.state.name,
-      date
+      start
     });
     this.setState({
       openCalendar: false,

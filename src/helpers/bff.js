@@ -276,7 +276,7 @@ export default function ({ app }) {
         .then(plansWithDirection =>
           res.json({
             ...itinerary,
-            plans: plansWithDirection
+            plans: plansWithDirection.filter(plan => plan)
           })
         );
     });
@@ -287,10 +287,12 @@ export default function ({ app }) {
       .post('https://chaus.herokuapp.com/apis/monomi/itineraries')
       .send({
         ...req.body,
+        start: moment(req.body.start).format(),
         user: req.user.id
       })
       .then(response =>
-        res.json(response.body)
+        res.json(response.body),
+        err => console.log(err) || res.json({})
       );
   });
 
