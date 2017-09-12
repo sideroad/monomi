@@ -350,6 +350,7 @@ class Home extends Component {
           width={this.state.width}
           height={this.state.height}
           places={this.props.places}
+          routes={this.props.routes}
           selected={this.props.place}
           current={this.props.current}
           onViewportChange={this.onViewportChange}
@@ -397,6 +398,7 @@ Home.propTypes = {
   setBounds: PropTypes.func.isRequired,
   itineraries: PropTypes.array.isRequired,
   itinerary: PropTypes.object.isRequired,
+  routes: PropTypes.array.isRequired,
   openItinerary: PropTypes.bool.isRequired,
 };
 
@@ -421,6 +423,7 @@ const connected = connect(
     user: state.user.item,
     itineraries: state.itinerary.items,
     itinerary: state.itinerary.item,
+    routes: state.itinerary.routes,
     openItinerary: state.itinerary.openItinerary,
   }),
   {

@@ -2,13 +2,38 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DeckGL, { ScatterplotLayer } from 'deck.gl';
 import MapGL from 'react-map-gl';
+import TripsLayer from './trips-layer';
 import config from '../config';
 
 const TOKEN = config.mapbox.token;
 
 class WorldMap extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      time: 0
+    };
+  }
   componentDidMount() {
     this.map = this.mapgl.getMap();
+    this.animate();
+  }
+
+  componentWillUnmount() {
+    if (this.animationFrame) {
+      window.cancelAnimationFrame(this.animationFrame);
+    }
+  }
+
+  animate() {
+    const timestamp = Date.now();
+    const loopLength = 10000;
+    const loopTime = 5000;
+
+    this.setState({
+      time: ((timestamp % loopTime) / loopTime) * loopLength
+    });
+    this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
   }
 
   render() {
@@ -44,6 +69,16 @@ class WorldMap extends Component {
         radiusMinPixels: 3,
         radiusMaxPixels: 15,
       }),
+      new TripsLayer({
+        id: 'routes',
+        data: this.props.routes,
+        getPath: d => d.segments,
+        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        opacity: 1,
+        strokeWidth: 100,
+        trailLength: 1000,
+        currentTime: this.state.time
+      })
     ];
 
     return (
@@ -80,7 +115,8 @@ WorldMap.propTypes = {
   current: PropTypes.object,
   placeInitialized: PropTypes.func.isRequired,
   onLayerClick: PropTypes.func.isRequired,
-  onViewportChange: PropTypes.func.isRequired
+  onViewportChange: PropTypes.func.isRequired,
+  routes: PropTypes.array.isRequired,
 };
 
 WorldMap.defaultProps = {
