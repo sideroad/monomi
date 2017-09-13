@@ -161,18 +161,13 @@ class Itinerary extends Component {
   }
 
   onSortEnd({ oldIndex, newIndex }) {
-    const plans = arrayMove(this.state.plans, oldIndex, newIndex);
-    const oldOrder = this.state.plans[oldIndex].order;
-    const newOrder = this.state.plans[newIndex].order;
+    const plans = arrayMove(this.state.plans, oldIndex, newIndex).map((plan, index) => ({
+      ...plan,
+      order: index
+    }));
     this.props.onReplace(
       this.props.id,
-      [{
-        ...this.state.plans[oldIndex],
-        order: newOrder,
-      }, {
-        ...this.state.plans[newIndex],
-        order: oldOrder,
-      }]
+      plans
     );
     this.setState({
       plans
@@ -196,7 +191,6 @@ class Itinerary extends Component {
           helperClass={styles.dragging}
           pressDelay={200}
           useDragHandle
-          useWindowAsScrollContainer
           onClickRemove={this.props.onClickRemove}
           onClickPlace={this.props.onClickPlace}
           onClickCommunication={this.props.onClickCommunication}

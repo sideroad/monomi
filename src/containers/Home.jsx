@@ -105,6 +105,10 @@ class Home extends Component {
   onClickItinerary(itinerary) {
     this.context.fetcher.itinerary.get({
       id: itinerary.id
+    }).then((res) => {
+      if (res.body.plans.length) {
+        this.onClickPlanPlace(res.body.plans[0].place);
+      }
     });
   }
 
@@ -351,6 +355,7 @@ class Home extends Component {
           height={this.state.height}
           places={this.props.places}
           routes={this.props.routes}
+          loopTime={this.props.loopTime}
           selected={this.props.place}
           current={this.props.current}
           onViewportChange={this.onViewportChange}
@@ -399,6 +404,7 @@ Home.propTypes = {
   itineraries: PropTypes.array.isRequired,
   itinerary: PropTypes.object.isRequired,
   routes: PropTypes.array.isRequired,
+  loopTime: PropTypes.number.isRequired,
   openItinerary: PropTypes.bool.isRequired,
 };
 
@@ -424,6 +430,7 @@ const connected = connect(
     itineraries: state.itinerary.items,
     itinerary: state.itinerary.item,
     routes: state.itinerary.routes,
+    loopTime: state.itinerary.loopTime,
     openItinerary: state.itinerary.openItinerary,
   }),
   {

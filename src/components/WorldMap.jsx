@@ -27,8 +27,8 @@ class WorldMap extends Component {
 
   animate() {
     const timestamp = Date.now();
-    const loopLength = 10000;
-    const loopTime = 5000;
+    const loopLength = this.props.loopTime;
+    const loopTime = this.props.loopTime * 10;
 
     this.setState({
       time: ((timestamp % loopTime) / loopTime) * loopLength
@@ -76,7 +76,7 @@ class WorldMap extends Component {
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 1,
         strokeWidth: 100,
-        trailLength: 1000,
+        trailLength: 500,
         currentTime: this.state.time
       })
     ];
@@ -117,6 +117,7 @@ WorldMap.propTypes = {
   onLayerClick: PropTypes.func.isRequired,
   onViewportChange: PropTypes.func.isRequired,
   routes: PropTypes.array.isRequired,
+  loopTime: PropTypes.number.isRequired,
 };
 
 WorldMap.defaultProps = {

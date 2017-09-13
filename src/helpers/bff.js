@@ -319,16 +319,14 @@ export default function ({ app }) {
   });
 
   app.post('/apis/itineraries/:id/plans', (req, res) => {
-    mapSeries({
-      args: req.body.items,
-      fn: plan =>
-        request
-          .post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`)
-          .send({
-            ...plan,
-            itinerary: req.params.id,
-          }),
-    }).then(() =>
+    Promise.all(req.body.items.map(plan =>
+      request
+        .post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`)
+        .send({
+          ...plan,
+          itinerary: req.params.id,
+        })
+    )).then(() =>
       res.json({})
     );
   });

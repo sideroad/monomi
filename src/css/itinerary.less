@@ -15,7 +15,8 @@
 
 .list {
   list-style: none;
-  overflow: auto;
+  overflow-y: scroll; /* has to be scroll, not auto */
+  -webkit-overflow-scrolling: touch;
   height: 100vh;
   padding: 0 30px;
 }
