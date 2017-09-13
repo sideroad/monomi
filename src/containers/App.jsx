@@ -31,9 +31,7 @@ const connected = connect(
   state => ({
     loading: state.place.loading ||
              state.transaction.loading ||
-             !state.place.initialized ||
-             state.plan.loading ||
-             state.itinerary.loading
+             !state.place.initialized
   }),
   {}
 )(App);

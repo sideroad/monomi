@@ -3,7 +3,6 @@ import request from 'superagent';
 import moment from 'moment';
 import polyline from '@mapbox/polyline';
 import config from '../config';
-import { mapSeries } from '../helpers/async-promise';
 import { TAG, PLACE } from '../reducers/suggest';
 
 const getPlacesByTag = req =>

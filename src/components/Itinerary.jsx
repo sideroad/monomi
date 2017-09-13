@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import autoBind from 'react-autobind';
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
+import _ from 'lodash';
 import { stringify } from '../helpers/time';
 import TimeControl from '../components/TimeControl';
 
@@ -130,9 +131,17 @@ class Itinerary extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-      plans: nextProps.plans
-    });
+    if (!_.isEqual(this.state.plans, nextProps.plans)) {
+      const changing = this.state.plans.filter(plan => plan.changingSojourn)[0] || {};
+      this.setState({
+        plans: nextProps.plans.map(plan =>
+          (plan.id === changing.id ? {
+            ...plan,
+            changingSojourn: true
+          } : plan)
+        )
+      });
+    }
   }
 
   onClickSojourn(plan) {

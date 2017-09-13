@@ -73,7 +73,7 @@ class WorldMap extends Component {
         id: 'routes',
         data: this.props.routes,
         getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        getColor: () => [170, 207, 83],
         opacity: 1,
         strokeWidth: 100,
         trailLength: 500,
