@@ -76,7 +76,7 @@ class WorldMap extends Component {
         getColor: () => [170, 207, 83],
         opacity: 1,
         strokeWidth: 100,
-        trailLength: 250,
+        trailLength: 100,
         currentTime: this.state.time
       })
     ];
