@@ -26,8 +26,8 @@ class Home extends Component {
       width: 1,
       height: 1,
       mapViewState: {
-        latitude: 35.949097014978605,
-        longitude: 136.00705539354635,
+        latitude: props.place.lat || 35.949097014978605,
+        longitude: props.place.lng || 136.00705539354635,
         zoom: 15,
         pitch: 30,
         bearing: 0
@@ -53,6 +53,9 @@ class Home extends Component {
         () => {},
         () => {}
       );
+    }
+    if (this.props.place.id) {
+      this.setBounds();
     }
     window.addEventListener('resize', () => this.onResize());
     watchLocation(this.syncLocation);

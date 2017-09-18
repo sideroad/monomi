@@ -86,12 +86,16 @@ const asynced = asyncConnect([{
           id: params.id
         })
         .then(res =>
-          fetcher.place.get({
-            id: res.body.plans[0].place.id
-          })
+          (res.body.plans.length ?
+            fetcher.place.get({
+              id: res.body.plans[0].place.id
+            })
+          : {})
         )
         .then(res =>
-          dispatch(setPlace(res.body))
+          (res.body ?
+            dispatch(setPlace(res.body))
+          : {})
         )
       );
     }
