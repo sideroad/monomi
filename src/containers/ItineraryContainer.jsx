@@ -77,12 +77,23 @@ const connected = connect(
 )(ItineraryContainer);
 
 const asynced = asyncConnect([{
-  promise: ({ store: { getState }, helpers: { fetcher }, params }) => {
+  promise: ({ store: { getState, dispatch }, helpers: { fetcher }, params }) => {
     const promises = [];
     if (!getState().itinerary.item.id) {
-      promises.push(fetcher.itinerary.get({
-        id: params.id
-      }));
+      dispatch(disableTrace());
+      promises.push(
+        fetcher.itinerary.get({
+          id: params.id
+        })
+        .then(res =>
+          fetcher.place.get({
+            id: res.body.plans[0].place.id
+          })
+        )
+        .then(res =>
+          dispatch(setPlace(res.body))
+        )
+      );
     }
     return Promise.all(promises);
   }
