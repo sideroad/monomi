@@ -6,7 +6,6 @@ const GETS_FAIL = 'place/GETS_FAIL';
 const SET_PLACE = 'place/SET_PLACE';
 const SET_PLACES = 'place/SET_PLACES';
 const SET_CURRENT_PLACE = 'place/SET_CURRENT_PLACE';
-const SET_FIND_PLACE = 'place/SET_FIND_PLACE';
 const INITIALIZED = 'place/INITIALIZED';
 const REFRESH = 'place/REFRESH';
 const ENABLE_TRACE = 'place/ENABLE_TRACE';
@@ -98,11 +97,12 @@ export default function reducer(state = initialState, action = {}) {
         error: action.error
       };
     case SET_PLACE: {
-      const items = state.items.map(item =>
-        (action.item.id === item.id ? action.item : item)
-      );
+      const exists = state.items.filter(item => item.id === action.item.id).length;
+      const items = exists ? state.items : state.items.concat([action.item]);
       return {
         ...state,
+        loading: false,
+        loaded: true,
         item: action.item,
         items,
         targets: filter(state.filtered, items, state.bounds),
@@ -124,18 +124,6 @@ export default function reducer(state = initialState, action = {}) {
           ...action.item
         }
       };
-    case SET_FIND_PLACE: {
-      const exists = state.items.filter(item => item.id === action.item.id).length;
-      const items = exists ? state.items : state.items.concat([action.item]);
-      return {
-        ...state,
-        loading: false,
-        loaded: true,
-        item: action.item,
-        items,
-        targets: filter(state.filtered, items, state.bounds),
-      };
-    }
     case ENABLE_TRACE:
       return {
         ...state,
@@ -166,13 +154,6 @@ export function initialized() {
 export function setPlace(item) {
   return {
     type: SET_PLACE,
-    item
-  };
-}
-
-export function setFindPlace(item) {
-  return {
-    type: SET_FIND_PLACE,
     item
   };
 }

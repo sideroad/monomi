@@ -69,7 +69,12 @@ class WorldMap extends Component {
         radiusMinPixels: 2,
         radiusMaxPixels: 15,
       }),
-      new TripsLayer({
+    ];
+    if (
+      this.props.routes.length &&
+      this.props.routes[0].segments.length
+    ) {
+      layers.push(new TripsLayer({
         id: 'routes',
         data: this.props.routes,
         getPath: d => d.segments,
@@ -78,8 +83,8 @@ class WorldMap extends Component {
         strokeWidth: 100,
         trailLength: 100,
         currentTime: this.state.time
-      })
-    ];
+      }));
+    }
 
     return (
       <MapGL

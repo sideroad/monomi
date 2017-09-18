@@ -26,6 +26,8 @@ export default {
     find: {
       url: `${config.app.base}/apis/find`,
       method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
       cache: {
         client: true
       }

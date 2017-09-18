@@ -202,10 +202,11 @@ export default function ({ app }) {
       );
   });
 
-  const getDirection = (req, from, to) =>
-    console.log(`https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${moment(from.start).add(from.sojourn, 'minutes').valueOf() / 1000}&mode=${from.communication.id}&key=${config.googleapis.key}`) ||
-    request
-      .get(`https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${moment(from.start).add(from.sojourn, 'minutes').valueOf() / 1000}&mode=${from.communication.id}&key=${config.googleapis.key}`)
+  const getDirection = (req, from, to) => {
+    const departureTime = moment(from.start).add(from.sojourn, 'minutes');
+    const requestUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${departureTime.startOf('date') >= moment().startOf('date') ? departureTime.valueOf() / 1000 : ''}&mode=${from.communication.id}&key=${config.googleapis.key}`;
+    return request
+      .get(requestUrl)
       .set({
         ...req.headers,
         Host: config.googleapis.host
@@ -219,7 +220,10 @@ export default function ({ app }) {
                      .add(from.sojourn, 'minutes')
                      .add(response.body.routes[0].legs[0].duration.value, 'seconds')
                      .format()
-      }));
+      }),
+      () => console.error('# Direction fetch has failed. ', requestUrl)
+    );
+  };
 
   const applyStartTime = (req, next, plans = []) =>
     new Promise((resolve) => {
@@ -308,7 +312,7 @@ export default function ({ app }) {
           .send({
             ...req.body,
             sojourn: 15,
-            communication: 'walking',
+            communication: 'driving',
             order,
           })
           .then(response =>

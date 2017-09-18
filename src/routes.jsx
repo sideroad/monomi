@@ -4,6 +4,8 @@ import { auth } from 'koiki';
 
 import App from './containers/App';
 import { default as Home } from './containers/Home';
+import { default as ItinerariesContainer } from './containers/ItinerariesContainer';
+import { default as ItineraryContainer } from './containers/ItineraryContainer';
 import { default as Terms } from './containers/Terms';
 import NotFound from './containers/NotFound';
 import { set as setUser } from './reducers/user';
@@ -19,11 +21,10 @@ export default (store, cookie) =>
     component={App}
     onEnter={auth.login(store, cookie, config.app.base, 'facebook', setUser)}
   >
-    <IndexRoute path={uris.pages.home} component={Home} />
-    <Route
-      path={uris.pages.home}
-      component={Home}
-    >
+    <IndexRoute component={Home} />
+    <Route path={uris.pages.home} component={Home}>
+      <Route path={uris.pages.itinerary} component={ItineraryContainer} />
+      <Route path={uris.pages.itineraries} component={ItinerariesContainer} />
       <Route path={uris.pages.terms} component={Terms} />
     </Route>
     { /* Catch all route */ }

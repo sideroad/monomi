@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { asyncConnect } from 'redux-connect';
 import { push } from 'react-router-redux';
 import autoBind from 'react-autobind';
 // import update from 'immutability-helper';
+import { stringify } from 'koiki';
+import uris from '../uris';
 import FindPlace from '../components/FindPlace';
-import Itineraries from '../components/Itineraries';
-import Itinerary from '../components/Itinerary';
 import WorldMap from '../components/WorldMap';
 import SideBar from '../components/SideBar';
 import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
-import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, setFindPlace, enableTrace, disableTrace, toggleFilter, setBounds } from '../reducers/place';
-import { watch as watchLocation, get as getLocation, calc as calcLocation, doubleBounds } from '../helpers/location';
+import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, enableTrace, disableTrace, toggleFilter, setBounds } from '../reducers/place';
+import { watch as watchLocation, get as getLocation, calc as calcLocation, doubleBounds, isInside } from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -24,7 +25,6 @@ class Home extends Component {
     this.state = {
       width: 1,
       height: 1,
-      opened: false,
       mapViewState: {
         latitude: 35.949097014978605,
         longitude: 136.00705539354635,
@@ -33,6 +33,7 @@ class Home extends Component {
         bearing: 0
       },
       focused: false,
+      openedSidebar: false,
     };
     autoBind(this);
   }
@@ -51,8 +52,6 @@ class Home extends Component {
       }).then(
         () => {},
         () => {}
-      ).then(() =>
-        this.context.fetcher.itinerary.gets()
       );
     }
     window.addEventListener('resize', () => this.onResize());
@@ -62,6 +61,22 @@ class Home extends Component {
   componentWillReceiveProps(nextProps) {
     if (!this.props.trace && nextProps.trace) {
       getLocation(this.syncLocation);
+    }
+    if (nextProps.place.id !== this.props.place.id &&
+        !isInside({
+          place: nextProps.place,
+          bounds: this.props.bounds
+        })
+    ) {
+      this.setState({
+        mapViewState: {
+          ...this.state.mapViewState,
+          latitude: nextProps.place.lat,
+          longitude: nextProps.place.lng,
+          zoom: 15,
+        }
+      });
+      this.setBounds();
     }
   }
 
@@ -100,16 +115,6 @@ class Home extends Component {
 
   onClickCurrentPlace() {
     this.props.enableTrace();
-  }
-
-  onClickItinerary(itinerary) {
-    this.context.fetcher.itinerary.get({
-      id: itinerary.id
-    }).then((res) => {
-      if (res.body.plans.length) {
-        this.onClickPlanPlace(res.body.plans[0].place);
-      }
-    });
   }
 
   onClickFavoriteFilter() {
@@ -176,16 +181,7 @@ class Home extends Component {
           id: item.id
         }).then(res => res.body)
       ).then((place) => {
-        this.setState({
-          mapViewState: {
-            ...this.state.mapViewState,
-            latitude: place.lat,
-            longitude: place.lng,
-            zoom: 15,
-          }
-        });
-        this.props.setFindPlace(place);
-        this.setBounds();
+        this.props.setPlace(place);
       });
     }
   }
@@ -215,73 +211,26 @@ class Home extends Component {
     }
   }
 
-  onAddItinerary(itinerary) {
-    this.context.fetcher.itinerary.add(itinerary)
-      .then(() =>
-        this.context.fetcher.itinerary.gets()
-      );
-  }
-
-  onClickPlanRemove(id) {
-    this.context.fetcher.plan.remove({
-      id
-    }).then(() =>
-      this.context.fetcher.itinerary.get({
+  onClickOpenSideBar() {
+    if (!this.props.openItinerary) {
+      this.props.push(stringify(uris.pages.itineraries, { lang: this.context.lang }));
+    } else {
+      this.props.push(stringify(uris.pages.itinerary, {
+        lang: this.context.lang,
         id: this.props.itinerary.id
-      })
-    );
+      }));
+    }
   }
 
-  onClickPlanCommunication(id, communication) {
-    this.context.fetcher.plan.update({
-      id,
-      communication
-    }).then(() =>
-      this.context.fetcher.itinerary.get({
-        id: this.props.itinerary.id
-      })
-    );
-  }
-
-  onClickPlanPlace(place) {
-    this.props.disableTrace();
-    this.setState({
-      mapViewState: {
-        ...this.state.mapViewState,
-        latitude: place.lat,
-        longitude: place.lng,
-        zoom: 15,
-      }
-    });
-    this.context.fetcher.place.get({
-      id: place.id
-    }).then((res) => {
-      this.props.setFindPlace(res.body);
-      this.setBounds();
-    });
-  }
-
-  onReplacePlans(id, items) {
-    this.context.fetcher.plan.replaces({
-      id,
-      items: items.map(item => ({
-        id: item.id,
-        itinerary: item.itinerary.id,
-        place: item.place.id,
-        sojourn: item.sojourn,
-        communication: item.communication.id,
-        order: item.order,
-      }))
-    }).then(() =>
-      this.context.fetcher.itinerary.get({
-        id: this.props.itinerary.id
-      })
-    );
+  onClickCloseSideBar() {
+    this.props.push(stringify(uris.pages.root, { lang: this.context.lang }));
   }
 
   setBounds() {
-    const bounds = this.worldMap.mapgl.getMap().getBounds();
-    this.props.setBounds(doubleBounds(bounds));
+    setTimeout(() => {
+      const bounds = this.worldMap.mapgl.getMap().getBounds();
+      this.props.setBounds(doubleBounds(bounds));
+    }, 200);
   }
 
   syncLocation(location) {
@@ -299,14 +248,6 @@ class Home extends Component {
       });
       this.setBounds();
     }
-  }
-
-  handleOpen() {
-    this.setState({ opened: true });
-  }
-
-  handleClose() {
-    this.setState({ opened: false });
   }
 
   render() {
@@ -330,22 +271,15 @@ class Home extends Component {
             />
           : ''
         }
-        <SideBar icon="fa-book" closeClickedOutSide={false} >
+        <SideBar
+          icon="fa-book"
+          opened={this.props.openSidebar}
+          closeClickedOutSide={false}
+          onClickOpen={this.onClickOpenSideBar}
+          onClickClose={this.onClickCloseSideBar}
+        >
           {
-            this.props.openItinerary ?
-              <Itinerary
-                {...this.props.itinerary}
-                onClickPlace={this.onClickPlanPlace}
-                onClickRemove={this.onClickPlanRemove}
-                onClickCommunication={this.onClickPlanCommunication}
-                onReplace={this.onReplacePlans}
-              />
-            :
-              <Itineraries
-                itineraries={this.props.itineraries}
-                onClickItinerary={this.onClickItinerary}
-                onAddItinerary={this.onAddItinerary}
-              />
+            this.props.children
           }
         </SideBar>
         <WorldMap
@@ -376,7 +310,6 @@ class Home extends Component {
             />
           : null
         }
-        {this.props.children ? this.props.children : ''}
       </div>
     );
   }
@@ -386,10 +319,10 @@ Home.propTypes = {
   places: PropTypes.array.isRequired,
   suggests: PropTypes.array.isRequired,
   place: PropTypes.object.isRequired,
+  bounds: PropTypes.object.isRequired,
   current: PropTypes.object.isRequired,
   setPlace: PropTypes.func.isRequired,
   setCurrentPlace: PropTypes.func.isRequired,
-  setFindPlace: PropTypes.func.isRequired,
   setPlaces: PropTypes.func.isRequired,
   children: PropTypes.element,
   placeInitialized: PropTypes.func.isRequired,
@@ -401,11 +334,12 @@ Home.propTypes = {
   filtered: PropTypes.bool.isRequired,
   toggleFilter: PropTypes.func.isRequired,
   setBounds: PropTypes.func.isRequired,
-  itineraries: PropTypes.array.isRequired,
   itinerary: PropTypes.object.isRequired,
   routes: PropTypes.array.isRequired,
   loopTime: PropTypes.number.isRequired,
   openItinerary: PropTypes.bool.isRequired,
+  openSidebar: PropTypes.bool.isRequired,
+  push: PropTypes.func.isRequired,
 };
 
 Home.defaultProps = {
@@ -418,27 +352,29 @@ Home.contextTypes = {
 };
 
 const connected = connect(
-  state => ({
+  (state, props) => ({
     places: state.place.targets,
     suggests: state.suggest.items,
     place: state.place.item,
+    bounds: state.place.bounds,
     current: state.place.current,
     trace: state.place.trace,
     filtered: state.place.filtered,
     authed: state.user.authed,
     user: state.user.item,
-    itineraries: state.itinerary.items,
     itinerary: state.itinerary.item,
     routes: state.itinerary.routes,
     loopTime: state.itinerary.loopTime,
     openItinerary: state.itinerary.openItinerary,
+    openSidebar: props.location.pathname !== stringify(uris.pages.home, {
+      lang: props.params.lang
+    }),
   }),
   {
     placeInitialized,
     push,
     setPlace,
     setCurrentPlace,
-    setFindPlace,
     setPlaces,
     enableTrace,
     disableTrace,
@@ -447,4 +383,9 @@ const connected = connect(
   }
 )(Home);
 
-export default connected;
+export default asyncConnect([{
+  promise: () => {
+    const promises = [];
+    return Promise.all(promises);
+  }
+}])(connected);

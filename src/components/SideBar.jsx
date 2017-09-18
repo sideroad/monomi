@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import PrevNextButton from '../components/PrevNextButton';
 
@@ -8,70 +8,49 @@ const ui = {
   fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
 };
 
-class SideBar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      opened: false
-    };
-  }
-
-  render() {
-    return (
-      <div
-        className={styles.sideBar}
-      >
-        {
-          this.props.closeClickedOutSide ?
-            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-            <div
-              className={`${styles.overlay} ${this.state.opened ? styles.open : styles.close}`}
-              onClick={() => {
-                this.setState({
-                  opened: !this.state.opened
-                });
-              }}
-            />
-          : ''
-        }
-        <button
-          className={`${styles.opener} ${this.state.opened ? styles.open : styles.close}`}
-          onClick={(evt) => {
-            evt.preventDefault();
-            this.setState({
-              opened: true
-            });
-          }}
-        >
-          <i className={`${ui.fa.fa} ${ui.fa[this.props.icon]}`} />
-        </button>
-        <PrevNextButton
-          className={styles.closeButton}
-          opened={this.state.opened}
-          onClick={() => {
-            this.setState({
-              opened: false
-            });
-          }}
-        />
+const SideBar = props =>
+  <div
+    className={styles.sideBar}
+  >
+    {
+      props.closeClickedOutSide ?
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
-          className={`${styles.container} ${this.state.opened ? styles.open : styles.close}`}
-        >
-          {this.state.opened ? this.props.children : ''}
-        </div>
-      </div>
-    );
-  }
-}
+          className={`${styles.overlay} ${props.opened ? styles.open : styles.close}`}
+          onClick={props.onClickClose}
+        />
+      : ''
+    }
+    <button
+      className={`${styles.opener} ${props.opened ? styles.open : styles.close}`}
+      onClick={props.onClickOpen}
+    >
+      <i className={`${ui.fa.fa} ${ui.fa[props.icon]}`} />
+    </button>
+    <PrevNextButton
+      className={styles.closeButton}
+      opened={props.opened}
+      onClick={props.onClickClose}
+    />
+    <div
+      className={`${styles.container} ${props.opened ? styles.open : styles.close}`}
+    >
+      {props.opened ? props.children : ''}
+    </div>
+  </div>;
 
 SideBar.propTypes = {
   icon: PropTypes.string.isRequired,
-  children: PropTypes.element.isRequired,
-  closeClickedOutSide: PropTypes.bool
+  children: PropTypes.element,
+  closeClickedOutSide: PropTypes.bool,
+  onClickOpen: PropTypes.func.isRequired,
+  onClickClose: PropTypes.func.isRequired,
+  opened: PropTypes.bool.isRequired,
 };
 
 SideBar.defaultProps = {
-  closeClickedOutSide: true
+  closeClickedOutSide: true,
+  children: () => {}
 };
 
 export default SideBar;

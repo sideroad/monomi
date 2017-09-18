@@ -157,11 +157,11 @@ class Itinerary extends Component {
   onChangeSojourn(plan, min) {
     const plans = this.state.plans.slice(0).map(item => ({
       ...item,
-      sojourn: plan.id === item.id ? min : item.sojourn
+      sojourn: plan.id === item.id ? min : item.sojourn,
+      changingSojourn: false,
     }));
     this.setState({
       plans,
-      changingSojourn: false,
     });
     this.props.onReplace(
       this.props.id,

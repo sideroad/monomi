@@ -67,9 +67,16 @@ const doubleBounds = (bounds) => {
   };
 };
 
+const isInside = ({ place, bounds }) =>
+  bounds.sw.lat >= place.lat &&
+  bounds.ne.lat <= place.lat &&
+  bounds.sw.lng >= place.lng &&
+  bounds.ne.lng <= place.lng;
+
 export {
   watch,
   get,
   calc,
   doubleBounds,
+  isInside,
 };
