@@ -65,10 +65,12 @@ export default function ({ app }) {
       })
       .then((response) => {
         const location = response.body.result.geometry.location;
+        const photo = response.body.result.photos[0];
+
         return {
           ...response.body.result,
           ...location,
-          image: '/images/no-image-place.png',
+          image: photo ? `https://${config.googleapis.host}/maps/api/place/photo?key=${config.googleapis.key}&maxwidth=500&maxheight=500&photoreference=${photo.photo_reference}` : '/images/no-image-place.png',
           link: response.body.result.url
         };
       }).then(place =>
@@ -202,9 +204,23 @@ export default function ({ app }) {
       );
   });
 
+  const getDepartureTime = (from) => {
+    const departure = moment(from.start).add(from.sojourn, 'minutes');
+    const nextDays = departure.days() < moment().days() ? departure.days() + 7 : departure.days();
+    const next = moment()
+      .days(nextDays)
+      .hours(departure.hours())
+      .minutes(departure.minutes())
+      .seconds(0)
+      .milliseconds(0);
+
+    return moment(departure).startOf('date') >= moment().startOf('date') ? departure.valueOf() / 1000 :
+           next.valueOf() / 1000;
+  };
+
   const getDirection = (req, from, to) => {
-    const departureTime = moment(from.start).add(from.sojourn, 'minutes');
-    const requestUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${departureTime.startOf('date') >= moment().startOf('date') ? departureTime.valueOf() / 1000 : ''}&mode=${from.communication.id}&key=${config.googleapis.key}`;
+    const departureTime = getDepartureTime(from);
+    const requestUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${departureTime}&mode=${from.communication.id}&key=${config.googleapis.key}`;
     return request
       .get(requestUrl)
       .set({
@@ -264,10 +280,13 @@ export default function ({ app }) {
           Promise.all(response.body.items.map(plan =>
             request
               .get(`https://chaus.herokuapp.com/apis/monomi/places/${plan.place.id}`)
-              .then(json => ({
-                ...plan,
-                place: json.body
-              }))
+              .then(
+                json => ({
+                  ...plan,
+                  place: json.body
+                }),
+                () => console.error('# Fetch place error', plan.place.id)
+              )
           ))),
     ]).then(([itinerary, plans]) => {
       applyStartTime(req, plans.sort((a, b) => (
