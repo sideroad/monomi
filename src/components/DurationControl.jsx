@@ -1,16 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import autoBind from 'react-autobind';
-import { padding } from '../helpers/time';
+import { objectize, parse, stringify } from '../helpers/time';
 
-const styles = require('../css/time-control.less');
+const styles = require('../css/duration-control.less');
 
-class TimeControl extends Component {
+const ui = {
+  // eslint-disable-next-line global-require
+  fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
+};
+
+class DurationControl extends Component {
   constructor(props) {
     super(props);
+    const { hours, minutes } = objectize(props.min);
     this.state = {
-      hours: props.hours,
-      minutes: props.minutes,
+      hours,
+      minutes,
       changing: false,
     };
     autoBind(this);
@@ -28,7 +34,7 @@ class TimeControl extends Component {
 
   onClick() {
     this.setState({
-      changing: true,
+      changing: true
     });
   }
 
@@ -47,7 +53,7 @@ class TimeControl extends Component {
   onKeyDown(evt) {
     switch (evt.key) {
       case 'Enter':
-        this.props.onSubmit(this.state);
+        this.props.onSubmit(parse(this.state));
         this.setState({
           changing: false
         });
@@ -58,7 +64,7 @@ class TimeControl extends Component {
 
   handleClickOutside(evt, formDOM) {
     if (formDOM && !formDOM.contains(evt.target)) {
-      this.props.onSubmit(this.state);
+      this.props.onSubmit(parse(this.state));
       this.setState({
         changing: false
       });
@@ -82,8 +88,8 @@ class TimeControl extends Component {
                 onChange={this.onChangeHours}
                 onKeyDown={this.onKeyDown}
                 min={0}
-                max={23}
-              /> :
+                max={24}
+              /> hrs
               <input
                 className={styles.min}
                 type="number"
@@ -92,26 +98,26 @@ class TimeControl extends Component {
                 onKeyDown={this.onKeyDown}
                 step={5}
                 min={0}
-                max={59}
-              />
+                max={55}
+              /> min
             </form>
           :
             <button
-              className={styles.time}
+              className={styles.duration}
               onClick={this.onClick}
             >
-              {padding(this.props.hours)}:{padding(this.props.minutes)}
+              <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
+              {stringify(this.props.min)}
             </button>
-        }
+      }
       </div>
     );
   }
 }
 
-TimeControl.propTypes = {
-  hours: PropTypes.number.isRequired,
-  minutes: PropTypes.number.isRequired,
+DurationControl.propTypes = {
+  min: PropTypes.number.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
-export default TimeControl;
+export default DurationControl;

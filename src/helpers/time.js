@@ -14,6 +14,8 @@ const objectize = (min) => {
   };
 };
 
+const padding = number =>
+  `0${number}`.slice(-2);
 
 const parse = ({ hours, minutes }) =>
   (Number(hours) * 60) + Number(minutes);
@@ -22,4 +24,5 @@ export {
   stringify,
   objectize,
   parse,
+  padding,
 };

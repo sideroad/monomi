@@ -87,6 +87,12 @@ export default {
       method: 'POST',
       mode: 'cors',
       credentials: 'include',
+    },
+    update: {
+      url: `${config.app.base}/apis/itineraries/:id`,
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
     }
   },
   plan: {

@@ -19,7 +19,7 @@ const ModalCalendar = props =>
     overlayClassName={styles.overlay}
   >
     <Calendar
-      date={props.date}
+      selected={[props.date]}
       onSelect={props.onSelect}
       styles={ui}
     />

@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import _ from 'lodash';
 import autoBind from 'react-autobind';
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
-import _ from 'lodash';
 import { stringify } from '../helpers/time';
+import DurationControl from '../components/DurationControl';
 import TimeControl from '../components/TimeControl';
+import ModalCalendar from '../components/ModalCalendar';
 
 const ui = {
   // eslint-disable-next-line global-require
@@ -29,13 +31,24 @@ const SortableItem = SortableElement(({
   onClickPlace,
   onClickRemove,
   onClickCommunication,
-  onClickSojourn,
   onChangeSojourn,
+  start,
+  onChangeItineraryTime
 }) =>
   <li key={plan.id} className={styles.item}>
     <div className={styles.place} >
       <div className={styles.time}>
-        <div className={styles.start}>{moment(plan.start).format('HH:mm')}</div>
+        <div className={styles.start}>
+          {
+            moment(plan.start).isSame(moment(start)) ?
+              <TimeControl
+                hours={moment(start).hours()}
+                minutes={moment(start).minutes()}
+                onSubmit={onChangeItineraryTime}
+              />
+            :
+              moment(plan.start).format('HH:mm')
+          }</div>
         <div className={styles.end}>{plan.end ? moment(plan.end).format('HH:mm') : ''}</div>
       </div>
       <DragHandle plan={plan} />
@@ -47,21 +60,10 @@ const SortableItem = SortableElement(({
           {plan.place.name}
         </button>
         <div className={styles.control}>
-          {
-            plan.changingSojourn ?
-              <TimeControl
-                min={plan.sojourn}
-                onSubmit={min => onChangeSojourn(plan, min)}
-              />
-            :
-              <button
-                className={styles.sojourn}
-                onClick={() => onClickSojourn(plan)}
-              >
-                <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
-                {stringify(plan.sojourn)}
-              </button>
-          }
+          <DurationControl
+            min={plan.sojourn}
+            onSubmit={min => onChangeSojourn(plan, min)}
+          />
           <button
             className={styles.remove}
             onClick={() => onClickRemove(plan.id)}
@@ -103,8 +105,9 @@ const SortableList = SortableContainer(({
   onClickPlace,
   onClickRemove,
   onClickCommunication,
-  onClickSojourn,
   onChangeSojourn,
+  start,
+  onChangeItineraryTime,
 }) =>
   <ul className={styles.list}>
     {plans.map((plan, index) => (
@@ -112,11 +115,12 @@ const SortableList = SortableContainer(({
         key={`plan-${index}-${plan.id}`}
         index={index}
         plan={plan}
+        start={start}
         onClickRemove={onClickRemove}
         onClickPlace={onClickPlace}
         onClickCommunication={onClickCommunication}
-        onClickSojourn={onClickSojourn}
         onChangeSojourn={onChangeSojourn}
+        onChangeItineraryTime={onChangeItineraryTime}
       />
     ))}
   </ul>);
@@ -126,31 +130,50 @@ class Itinerary extends Component {
     super(props);
     this.state = {
       plans: props.plans,
+      openCalendar: false,
     };
     autoBind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     if (!_.isEqual(this.state.plans, nextProps.plans)) {
-      const changing = this.state.plans.filter(plan => plan.changingSojourn)[0] || {};
       this.setState({
-        plans: nextProps.plans.map(plan =>
-          (plan.id === changing.id ? {
-            ...plan,
-            changingSojourn: true
-          } : plan)
-        )
+        plans: nextProps.plans,
       });
     }
   }
 
-  onClickSojourn(plan) {
-    const plans = this.state.plans.slice(0).map(item => ({
-      ...item,
-      changingSojourn: plan.id === item.id
-    }));
+  onClickCalendar() {
     this.setState({
-      plans
+      openCalendar: true,
+    });
+  }
+
+  onSelectItineraryDate(start) {
+    const current = moment(this.props.start);
+    this.props.onChangeItineraryDate(
+      moment(start)
+        .hours(current.hours())
+        .minutes(current.minutes())
+        .seconds(current.seconds())
+        .milliseconds(current.milliseconds())
+        .format()
+    );
+    this.setState({
+      openCalendar: false,
+    });
+  }
+
+  onChangeItineraryTime({ hours, minutes }) {
+    const current = moment(this.props.start);
+    this.props.onChangeItineraryDate(
+      current
+        .hours(hours)
+        .minutes(minutes)
+        .format()
+    );
+    this.setState({
+      openCalendar: false,
     });
   }
 
@@ -183,6 +206,18 @@ class Itinerary extends Component {
     });
   }
 
+  openCalendar() {
+    this.setState({
+      openCalendar: true,
+    });
+  }
+
+  closeCalendar() {
+    this.setState({
+      openCalendar: false,
+    });
+  }
+
   render() {
     return (
       <div
@@ -190,9 +225,16 @@ class Itinerary extends Component {
       >
         <div className={styles.itinerary}>
           {this.props.name}
+          <button
+            className={styles.calendar}
+            onClick={this.openCalendar}
+          >
+            <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
+          </button>
         </div>
         <SortableList
           plans={this.state.plans}
+          start={this.props.start}
           onSortEnd={this.onSortEnd}
           lockAxis="y"
           lockToContainerEdges
@@ -203,8 +245,14 @@ class Itinerary extends Component {
           onClickRemove={this.props.onClickRemove}
           onClickPlace={this.props.onClickPlace}
           onClickCommunication={this.props.onClickCommunication}
-          onClickSojourn={this.onClickSojourn}
           onChangeSojourn={this.onChangeSojourn}
+          onChangeItineraryTime={this.onChangeItineraryTime}
+        />
+        <ModalCalendar
+          date={moment(this.props.start).format('YYYY-MM-DD')}
+          opened={this.state.openCalendar}
+          onSelect={this.onSelectItineraryDate}
+          onClose={this.closeCalendar}
         />
       </div>
     );
@@ -213,11 +261,13 @@ class Itinerary extends Component {
 
 Itinerary.propTypes = {
   id: PropTypes.string.isRequired,
+  start: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   plans: PropTypes.array.isRequired,
   onClickRemove: PropTypes.func.isRequired,
   onClickPlace: PropTypes.func.isRequired,
   onClickCommunication: PropTypes.func.isRequired,
+  onChangeItineraryDate: PropTypes.func.isRequired,
   onReplace: PropTypes.func.isRequired,
 };
 

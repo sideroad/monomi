@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Input } from 'koiki-ui';
 import autoBind from 'react-autobind';
+import moment from 'moment';
 import ModalCalendar from '../components/ModalCalendar';
 
 const styles = require('../css/itineraries.less');
@@ -52,7 +53,7 @@ class Itineraries extends Component {
   onSelectItineraryDate(start) {
     this.props.onAddItinerary({
       name: this.state.name,
-      start
+      start: moment(start).format()
     });
     this.setState({
       openCalendar: false,

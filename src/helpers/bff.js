@@ -318,6 +318,19 @@ export default function ({ app }) {
       );
   });
 
+  app.post('/apis/itineraries/:id', (req, res) => {
+    request
+      .post(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
+      .send({
+        ...req.body,
+        start: moment(req.body.start).format(),
+      })
+      .then(response =>
+        res.json(response.body),
+        err => console.log(err) || res.json({})
+      );
+  });
+
   app.post('/apis/plans', (req, res) => {
     request
       .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.body.itinerary}&limit=1000`)

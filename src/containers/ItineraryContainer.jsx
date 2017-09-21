@@ -35,6 +35,17 @@ const ItineraryContainer = (props, context) =>
           })
         );
       }}
+      onChangeItineraryDate={(start) => {
+        context.fetcher.itinerary.update({
+          id: props.itinerary.id,
+          start,
+        })
+          .then(() =>
+            context.fetcher.itinerary.get({
+              id: props.itinerary.id
+            })
+          );
+      }}
       onReplace={(id, items) => {
         context.fetcher.plan.replaces({
           id,
