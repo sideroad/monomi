@@ -14,6 +14,7 @@ import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
 import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, enableTrace, disableTrace, toggleFilter, setBounds } from '../reducers/place';
+import watchOrientation from '../helpers/orientation';
 import { watch as watchLocation, get as getLocation, calc as calcLocation, doubleBounds, isInside } from '../helpers/location';
 
 const styles = require('../css/home.less');
@@ -58,6 +59,7 @@ class Home extends Component {
       this.setBounds();
     }
     window.addEventListener('resize', () => this.onResize());
+    watchOrientation(this.changePitch);
     watchLocation(this.syncLocation);
   }
 
@@ -251,6 +253,17 @@ class Home extends Component {
       });
       this.setBounds();
     }
+  }
+
+  changePitch(event) {
+    const pitch = event.beta <= 0 ? 0 :
+                  event.beta >= 45 ? 45 : event.beta;
+    this.setState({
+      mapViewState: {
+        ...this.state.mapViewState,
+        pitch,
+      }
+    });
   }
 
   render() {
