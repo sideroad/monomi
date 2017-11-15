@@ -19,6 +19,13 @@ class WorldMap extends Component {
     this.animate();
   }
 
+  componentWillReceiveProps() {
+    if (this.animationFrame) {
+      window.cancelAnimationFrame(this.animationFrame);
+      this.animate();
+    }
+  }
+
   componentWillUnmount() {
     if (this.animationFrame) {
       window.cancelAnimationFrame(this.animationFrame);
