@@ -72,7 +72,7 @@ class WorldMap extends Component {
     ];
     if (
       this.props.routes.length &&
-      this.props.routes[0].segments.length
+      this.props.routes[0].segments.length > 1
     ) {
       layers.push(new TripsLayer({
         id: 'routes',
