@@ -34,7 +34,7 @@ class WorldMap extends Component {
 
   animate() {
     const timestamp = Date.now();
-    const loopLength = this.props.loopTime;
+    const loopLength = this.props.loopTime < 2 ? 2 : this.props.loopTime;
     const loopTime = this.props.loopTime * 10;
 
     this.setState({
