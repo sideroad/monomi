@@ -19,13 +19,6 @@ class WorldMap extends Component {
     this.animate();
   }
 
-  componentWillReceiveProps() {
-    if (this.animationFrame) {
-      window.cancelAnimationFrame(this.animationFrame);
-      this.animate();
-    }
-  }
-
   componentWillUnmount() {
     if (this.animationFrame) {
       window.cancelAnimationFrame(this.animationFrame);
@@ -38,7 +31,7 @@ class WorldMap extends Component {
     const loopTime = this.props.loopTime * 10;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (((timestamp % loopTime) / loopTime) * loopLength) || 0
     });
     this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
   }
