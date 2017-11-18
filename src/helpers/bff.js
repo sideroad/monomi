@@ -206,7 +206,7 @@ export default function ({ app }) {
 
   const getDepartureTime = (from) => {
     const departure = moment(from.start).add(from.sojourn, 'minutes');
-    const nextDays = departure.days() < moment().days() ? departure.days() + 7 : departure.days();
+    const nextDays = departure.days() <= moment().days() ? departure.days() + 7 : departure.days();
     const next = moment()
       .days(nextDays)
       .hours(departure.hours())
@@ -214,7 +214,7 @@ export default function ({ app }) {
       .seconds(0)
       .milliseconds(0);
 
-    return moment(departure).startOf('date') >= moment().startOf('date') ? departure.valueOf() / 1000 :
+    return moment(departure).startOf('date') > moment().startOf('date') ? departure.valueOf() / 1000 :
            next.valueOf() / 1000;
   };
 
