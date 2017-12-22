@@ -70,20 +70,6 @@
   border-top:none;
 }
 
-.scale {
-  animation: scale 5s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-  animation-delay: 0s;
-}
-
-.scale2 {
-  animation: scale2 5s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-  animation-delay: 0s;
-}
-
 @keyframes icon{
   0%{
     filter: hue-rotate(0deg);
@@ -141,39 +127,5 @@
   }
   100% {
     opacity: 0.8;
-  }
-}
-
-@keyframes scale {
-  0% {
-    opacity: 0.2;
-    transform: scale(0) rotate(0deg);
-  }
-  75% {
-    opacity: 1;
-    transform: scale(1) rotate(180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.5) rotate(360deg);
-  }
-}
-
-@keyframes scale2 {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-  30% {
-    opacity: 0.2;
-    transform: scale(0) rotate(0deg);
-  }
-  75% {
-    opacity: 1;
-    transform: scale(1) rotate(180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.25) rotate(360deg);
   }
 }
