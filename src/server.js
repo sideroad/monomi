@@ -20,7 +20,7 @@ app.use(compression());
 app.use(favicon(path.join(__dirname, '..', 'static', 'images', 'favicon.png')));
 
 app.use(Express.static(path.join(__dirname, '..', 'static')));
-passporter.use({ facebook: config.facebook }, app, config.app.base);
+passporter.use({ github: config.github }, app, config.app.base);
 
 bff({
   app
@@ -42,18 +42,21 @@ server({
   manifest: {
     name: config.app.title,
     description: config.app.description,
-    background_color: '#171917',
+    background_color: '#171917'
   }
 });
 
 if (config.port) {
-
   new http.Server(app).listen(config.port, (err) => {
     if (err) {
       console.error(err);
     }
     console.info('----\n==> ✅  %s is running, talking to API server.', config.app.title);
-    console.info('==> 💻  Open http://%s:%s in a browser to view the app.', config.host, config.port);
+    console.info(
+      '==> 💻  Open http://%s:%s in a browser to view the app.',
+      config.host,
+      config.port
+    );
   });
 } else {
   console.error('==>     ERROR: No PORT environment variable has been specified');

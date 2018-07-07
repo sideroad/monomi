@@ -12,14 +12,14 @@ import { set as setUser } from './reducers/user';
 import uris from './uris';
 import config from './config';
 
-export default (store, cookie) =>
+export default (store, cookie) => (
   /**
    * Please keep routes in alphabetical order
    */
   <Route
     path={uris.pages.root}
     component={App}
-    onEnter={auth.login(store, cookie, config.app.base, 'facebook', setUser)}
+    onEnter={auth.login(store, cookie, config.app.base, 'github', setUser)}
   >
     <IndexRoute component={Home} />
     <Route path={uris.pages.home} component={Home}>
@@ -27,6 +27,7 @@ export default (store, cookie) =>
       <Route path={uris.pages.itineraries} component={ItinerariesContainer} />
       <Route path={uris.pages.terms} component={Terms} />
     </Route>
-    { /* Catch all route */ }
+    {/* Catch all route */}
     <Route path="*" component={NotFound} status={404} />
-  </Route>;
+  </Route>
+);

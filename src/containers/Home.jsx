@@ -13,8 +13,23 @@ import SideBar from '../components/SideBar';
 import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
 import { TAG } from '../reducers/suggest';
-import { initialized as placeInitialized, setPlace, setPlaces, setCurrentPlace, enableTrace, disableTrace, toggleFilter, setBounds } from '../reducers/place';
-import { watch as watchLocation, get as getLocation, calc as calcLocation, doubleBounds, isInside } from '../helpers/location';
+import {
+  initialized as placeInitialized,
+  setPlace,
+  setPlaces,
+  setCurrentPlace,
+  enableTrace,
+  disableTrace,
+  toggleFilter,
+  setBounds
+} from '../reducers/place';
+import {
+  watch as watchLocation,
+  get as getLocation,
+  calc as calcLocation,
+  doubleBounds,
+  isInside
+} from '../helpers/location';
 
 const styles = require('../css/home.less');
 
@@ -33,7 +48,7 @@ class Home extends Component {
         bearing: 0
       },
       focused: false,
-      openedSidebar: false,
+      openedSidebar: false
     };
     autoBind(this);
   }
@@ -47,12 +62,11 @@ class Home extends Component {
       limit: 100000
     });
     if (this.props.authed) {
-      this.context.fetcher.user.post({
-        facebook: this.props.user.id
-      }).then(
-        () => {},
-        () => {}
-      );
+      this.context.fetcher.user
+        .post({
+          github: this.props.user.id
+        })
+        .then(() => {}, () => {});
     }
     if (this.props.place.id) {
       this.setBounds();
@@ -65,18 +79,19 @@ class Home extends Component {
     if (!this.props.trace && nextProps.trace) {
       getLocation(this.syncLocation);
     }
-    if (nextProps.place.id !== this.props.place.id &&
-        !isInside({
-          place: nextProps.place,
-          bounds: this.props.bounds
-        })
+    if (
+      nextProps.place.id !== this.props.place.id &&
+      !isInside({
+        place: nextProps.place,
+        bounds: this.props.bounds
+      })
     ) {
       this.setState({
         mapViewState: {
           ...this.state.mapViewState,
           latitude: nextProps.place.lat,
           longitude: nextProps.place.lng,
-          zoom: 15,
+          zoom: 15
         }
       });
       this.setBounds();
@@ -135,54 +150,60 @@ class Home extends Component {
         place: this.props.place.id
       });
     }
-    promise
-      .then(() =>
-        this.props.setPlace({
-          ...this.props.place,
-          favorite: !this.props.place.favorite,
-          color: !this.props.place.favorite ? [236, 109, 113] : [44, 169, 225]
-        })
-      );
+    promise.then(() =>
+      this.props.setPlace({
+        ...this.props.place,
+        favorite: !this.props.place.favorite,
+        color: !this.props.place.favorite ? [236, 109, 113] : [44, 169, 225]
+      })
+    );
   }
 
   onClickAddPlan() {
-    this.context.fetcher.plan.add({
-      itinerary: this.props.itinerary.id,
-      place: this.props.place.id,
-    }).then(
-      () => this.context.fetcher.itinerary.get({
-        id: this.props.itinerary.id
+    this.context.fetcher.plan
+      .add({
+        itinerary: this.props.itinerary.id,
+        place: this.props.place.id
       })
-    );
+      .then(() =>
+        this.context.fetcher.itinerary.get({
+          id: this.props.itinerary.id
+        })
+      );
   }
 
   onSelectPlace(item) {
     this.props.disableTrace();
     if (item.type === TAG) {
-      this.context.fetcher.place.gets({
-        tag: item.id
-      }).then((res) => {
-        const places = res.body.items;
-        const calcedViewState = calcLocation(places);
-        this.setState({
-          mapViewState: {
-            ...this.state.mapViewState,
-            ...calcedViewState
-          }
+      this.context.fetcher.place
+        .gets({
+          tag: item.id
+        })
+        .then((res) => {
+          const places = res.body.items;
+          const calcedViewState = calcLocation(places);
+          this.setState({
+            mapViewState: {
+              ...this.state.mapViewState,
+              ...calcedViewState
+            }
+          });
+          this.props.setPlaces(places);
+          this.props.setPlace(calcedViewState.place);
+          this.setBounds();
         });
-        this.props.setPlaces(places);
-        this.props.setPlace(calcedViewState.place);
-        this.setBounds();
-      });
     } else {
-      (!item.lat && !item.lng ?
-        this.context.fetcher.place.find({
-          placeid: item.id
-        }).then(res => res.body)
-      :
-        this.context.fetcher.place.get({
-          id: item.id
-        }).then(res => res.body)
+      (!item.lat && !item.lng
+        ? this.context.fetcher.place
+            .find({
+              placeid: item.id
+            })
+            .then(res => res.body)
+        : this.context.fetcher.place
+            .get({
+              id: item.id
+            })
+            .then(res => res.body)
       ).then((place) => {
         this.props.setPlace(place);
       });
@@ -218,10 +239,12 @@ class Home extends Component {
     if (!this.props.openItinerary) {
       this.props.push(stringify(uris.pages.itineraries, { lang: this.context.lang }));
     } else {
-      this.props.push(stringify(uris.pages.itinerary, {
-        lang: this.context.lang,
-        id: this.props.itinerary.id
-      }));
+      this.props.push(
+        stringify(uris.pages.itinerary, {
+          lang: this.context.lang,
+          id: this.props.itinerary.id
+        })
+      );
     }
   }
 
@@ -246,7 +269,7 @@ class Home extends Component {
         mapViewState: {
           ...this.state.mapViewState,
           latitude: location.lat,
-          longitude: location.lng,
+          longitude: location.lng
         }
       });
       this.setBounds();
@@ -254,7 +277,6 @@ class Home extends Component {
   }
 
   render() {
-
     return (
       <div className={styles.container}>
         <FindPlace
@@ -266,14 +288,14 @@ class Home extends Component {
           onClickCurrentPlace={this.onClickCurrentPlace}
           trace={this.props.trace}
         />
-        {
-          !this.state.focused ?
-            <FavoriteFilter
-              filtered={this.props.filtered}
-              onClickFilter={this.onClickFavoriteFilter}
-            />
-          : ''
-        }
+        {!this.state.focused ? (
+          <FavoriteFilter
+            filtered={this.props.filtered}
+            onClickFilter={this.onClickFavoriteFilter}
+          />
+        ) : (
+          ''
+        )}
         <SideBar
           icon="fa-book"
           opened={this.props.openSidebar}
@@ -281,12 +303,12 @@ class Home extends Component {
           onClickOpen={this.onClickOpenSideBar}
           onClickClose={this.onClickCloseSideBar}
         >
-          {
-            this.props.children
-          }
+          {this.props.children}
         </SideBar>
         <WorldMap
-          ref={(elem) => { this.worldMap = elem; }}
+          ref={(elem) => {
+            this.worldMap = elem;
+          }}
           mapViewState={this.state.mapViewState}
           width={this.state.width}
           height={this.state.height}
@@ -300,19 +322,17 @@ class Home extends Component {
           placeInitialized={this.props.placeInitialized}
           onRender={this.onRenderWorldMap}
         />
-        {
-          this.props.place.name ?
-            <Place
-              name={this.props.place.name}
-              image={this.props.place.image}
-              link={this.props.place.link}
-              favorite={this.props.place.favorite}
-              showItinerary={this.props.openItinerary}
-              onClickFavorite={this.onClickFavorite}
-              onClickAddPlan={this.onClickAddPlan}
-            />
-          : null
-        }
+        {this.props.place.name ? (
+          <Place
+            name={this.props.place.name}
+            image={this.props.place.image}
+            link={this.props.place.link}
+            favorite={this.props.place.favorite}
+            showItinerary={this.props.openItinerary}
+            onClickFavorite={this.onClickFavorite}
+            onClickAddPlan={this.onClickAddPlan}
+          />
+        ) : null}
       </div>
     );
   }
@@ -342,16 +362,15 @@ Home.propTypes = {
   loopTime: PropTypes.number.isRequired,
   openItinerary: PropTypes.bool.isRequired,
   openSidebar: PropTypes.bool.isRequired,
-  push: PropTypes.func.isRequired,
+  push: PropTypes.func.isRequired
 };
 
-Home.defaultProps = {
-};
+Home.defaultProps = {};
 
 Home.contextTypes = {
   lang: PropTypes.string.isRequired,
   fetcher: PropTypes.object.isRequired,
-  i18n: PropTypes.object.isRequired,
+  i18n: PropTypes.object.isRequired
 };
 
 const connected = connect(
@@ -369,9 +388,11 @@ const connected = connect(
     routes: state.itinerary.routes,
     loopTime: state.itinerary.loopTime,
     openItinerary: state.itinerary.openItinerary,
-    openSidebar: props.location.pathname !== stringify(uris.pages.home, {
-      lang: props.params.lang
-    }),
+    openSidebar:
+      props.location.pathname !==
+      stringify(uris.pages.home, {
+        lang: props.params.lang
+      })
   }),
   {
     placeInitialized,
@@ -382,13 +403,15 @@ const connected = connect(
     enableTrace,
     disableTrace,
     toggleFilter,
-    setBounds,
+    setBounds
   }
 )(Home);
 
-export default asyncConnect([{
-  promise: () => {
-    const promises = [];
-    return Promise.all(promises);
+export default asyncConnect([
+  {
+    promise: () => {
+      const promises = [];
+      return Promise.all(promises);
+    }
   }
-}])(connected);
+])(connected);
