@@ -14,8 +14,7 @@ const getPlacesByTag = req =>
     })
     .then(response => response.body.items.map(item => item.place.id))
     .then(places =>
-      request
-        .get(`https://chaus.herokuapp.com/apis/monomi/places?id=${places.join(',')}`)
+      request.get(`https://chaus.herokuapp.com/apis/monomi/places?id=${places.join(',')}`)
     )
     .then(response => response.body.items);
 
@@ -58,7 +57,11 @@ export default function ({ app }) {
   });
   app.get('/apis/find', (req, res) => {
     request
-      .get(`https://${config.googleapis.host}/maps/api/place/details/json?key=${config.googleapis.key}&placeid=${req.query.placeid}`)
+      .get(
+        `https://${config.googleapis.host}/maps/api/place/details/json?key=${
+          config.googleapis.key
+        }&placeid=${req.query.placeid}`
+      )
       .set({
         ...req.headers,
         Host: config.googleapis.host
@@ -70,10 +73,15 @@ export default function ({ app }) {
         return {
           ...response.body.result,
           ...location,
-          image: photo ? `https://${config.googleapis.host}/maps/api/place/photo?key=${config.googleapis.key}&maxwidth=500&maxheight=500&photoreference=${photo.photo_reference}` : '/images/no-image-place.png',
+          image: photo
+            ? `https://${config.googleapis.host}/maps/api/place/photo?key=${
+                config.googleapis.key
+              }&maxwidth=500&maxheight=500&photoreference=${photo.photo_reference}`
+            : '/images/no-image-place.png',
           link: response.body.result.url
         };
-      }).then(place =>
+      })
+      .then(place =>
         request
           .post('https://chaus.herokuapp.com/apis/monomi/places')
           .send(place)
@@ -84,17 +92,27 @@ export default function ({ app }) {
                 .then(json => json.body),
             () =>
               request
-                .get(`https://chaus.herokuapp.com/apis/monomi/places?name=${encodeURIComponent(place.name)}`)
+                .get(
+                  `https://chaus.herokuapp.com/apis/monomi/places?name=${encodeURIComponent(
+                    place.name
+                  )}`
+                )
                 .then(json => json.body.items[0])
           )
       )
       .then(place =>
         request
-          .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${place.id}limit=1000`)
-          .then(json => res.json({
-            ...place,
-            favorite: !!json.body.items.length
-          }))
+          .get(
+            `https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${
+              place.id
+            }limit=1000`
+          )
+          .then(json =>
+            res.json({
+              ...place,
+              favorite: !!json.body.items.length
+            })
+          )
       );
   });
   app.get('/apis/places/:id', (req, res) => {
@@ -103,27 +121,30 @@ export default function ({ app }) {
         .get(`https://chaus.herokuapp.com/apis/monomi/places/${req.params.id}`)
         .then(response => response.body),
       request
-        .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${req.params.id}`)
+        .get(
+          `https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${
+            req.params.id
+          }`
+        )
         .then(response => response.body.items.map(favorite => favorite.place.id))
     ]).then(([place, favorites]) => {
       res.json({
         ...place,
         color: favorites.includes(place.id) ? [236, 109, 113] : [44, 169, 225],
-        favorite: favorites.includes(place.id),
+        favorite: favorites.includes(place.id)
       });
     });
   });
   app.get('/apis/places', (req, res) => {
     Promise.all([
-      req.query.tag ?
-        getPlacesByTag(req)
-      :
-        request
-          .get('https://chaus.herokuapp.com/apis/monomi/places?limit=100000')
-          .then(response => response.body.items),
+      req.query.tag
+        ? getPlacesByTag(req)
+        : request
+            .get('https://chaus.herokuapp.com/apis/monomi/places?limit=100000')
+            .then(response => response.body.items),
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&limit=1000`)
-        .then(response => response.body.items.map(item => item.place.id)),
+        .then(response => response.body.items.map(item => item.place.id))
     ]).then(([places, favorites]) => {
       res.json({
         items: places.map(place => ({
@@ -137,26 +158,35 @@ export default function ({ app }) {
     });
   });
   app.get('/apis/suggests', (req, res) => {
+    const autoCompleteUrl = `https://${
+      config.googleapis.host
+    }/maps/api/place/autocomplete/json?key=${config.googleapis.key}&input=${encodeURIComponent(
+      req.query.input
+    )}`;
+    console.log('# suggest', autoCompleteUrl);
     Promise.all([
       request
-        .get(`https://chaus.herokuapp.com/apis/monomi/tags?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
+        .get(
+          `https://chaus.herokuapp.com/apis/monomi/tags?name=*${encodeURIComponent(
+            req.query.input
+          )}*&limit=1000`
+        )
         .then(response => response.body.items)
         .then(tags =>
-          Promise.all(tags.map(tag =>
-            request
-              .get(`https://chaus.herokuapp.com/apis/monomi/taggings?tag=${tag.id}&limit=1`)
-              .then(response => ({
-                ...tag,
-                count: response.body.size
-              }))
-          ))
+          Promise.all(
+            tags.map(tag =>
+              request
+                .get(`https://chaus.herokuapp.com/apis/monomi/taggings?tag=${tag.id}&limit=1`)
+                .then(response => ({
+                  ...tag,
+                  count: response.body.size
+                }))
+            )
+          )
         )
         .then(tags =>
           tags
-            .sort((a, b) => (
-              a.count < b.count ? 1 :
-              a.count > b.count ? -1 : 0
-            ))
+            .sort((a, b) => (a.count < b.count ? 1 : a.count > b.count ? -1 : 0))
             .slice(0, 5)
             .filter(tag => tag.count >= 5)
         )
@@ -168,7 +198,11 @@ export default function ({ app }) {
           }))
         ),
       request
-        .get(`https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(req.query.input)}*&limit=1000`)
+        .get(
+          `https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(
+            req.query.input
+          )}*&limit=1000`
+        )
         .then(response =>
           response.body.items.map(item => ({
             ...item,
@@ -176,7 +210,7 @@ export default function ({ app }) {
           }))
         ),
       request
-        .get(`https://${config.googleapis.host}/maps/api/place/autocomplete/json?key=${config.googleapis.key}&input=${encodeURIComponent(req.query.input)}`)
+        .get(autoCompleteUrl)
         .set({
           ...req.headers,
           Host: config.googleapis.host
@@ -186,22 +220,26 @@ export default function ({ app }) {
             id: prediction.place_id,
             name: prediction.terms.map(term => term.value).join(', '),
             type: PLACE,
-            image: '/images/pin.png',
+            image: '/images/pin.png'
           }))
-        ),
-    ]).then(([tags, places, autocompletes]) => {
-      res.json({
-        items: tags.concat(places).concat(autocompletes).slice(0, 10)
-      });
-    }, err => console.log(err));
+        )
+    ]).then(
+      ([tags, places, autocompletes]) => {
+        res.json({
+          items: tags
+            .concat(places)
+            .concat(autocompletes)
+            .slice(0, 10)
+        });
+      },
+      err => console.log(err)
+    );
   });
 
   app.get('/apis/itineraries', (req, res) => {
     request
       .get(`https://chaus.herokuapp.com/apis/monomi/itineraries?user=${req.user.id}`)
-      .then(response =>
-        res.json(response.body)
-      );
+      .then(response => res.json(response.body));
   });
 
   const getDepartureTime = (from) => {
@@ -214,31 +252,38 @@ export default function ({ app }) {
       .seconds(0)
       .milliseconds(0);
 
-    return moment(departure).startOf('date') > moment().startOf('date') ? departure.valueOf() / 1000 :
-           next.valueOf() / 1000;
+    return moment(departure).startOf('date') > moment().startOf('date')
+      ? departure.valueOf() / 1000
+      : next.valueOf() / 1000;
   };
 
   const getDirection = (req, from, to) => {
     const departureTime = getDepartureTime(from);
-    const requestUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${from.place.lat},${from.place.lng}&destination=${to.place.lat},${to.place.lng}&departure_time=${departureTime}&mode=${from.communication.id}&key=${config.googleapis.key}`;
+    const requestUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${
+      from.place.lat
+    },${from.place.lng}&destination=${to.place.lat},${
+      to.place.lng
+    }&departure_time=${departureTime}&mode=${from.communication.id}&key=${config.googleapis.key}`;
+    console.log('# getDirection', requestUrl);
     return request
       .get(requestUrl)
       .set({
         ...req.headers,
         Host: config.googleapis.host
       })
-      .then(response => ({
-        direction: {
-          ...response.body,
-          points: polyline.decode(response.body.routes[0].overview_polyline.points)
-        },
-        nextStart: moment(from.start)
-                     .add(from.sojourn, 'minutes')
-                     .add(response.body.routes[0].legs[0].duration.value, 'seconds')
-                     .format()
-      }),
-      () => console.error('# Direction fetch has failed. ', requestUrl)
-    );
+      .then(
+        response => ({
+          direction: {
+            ...response.body,
+            points: polyline.decode(response.body.routes[0].overview_polyline.points)
+          },
+          nextStart: moment(from.start)
+            .add(from.sojourn, 'minutes')
+            .add(response.body.routes[0].legs[0].duration.value, 'seconds')
+            .format()
+        }),
+        () => console.error('# Direction fetch has failed. ', requestUrl)
+      );
   };
 
   const applyStartTime = (req, next, plans = []) =>
@@ -246,24 +291,32 @@ export default function ({ app }) {
       const from = next.shift();
       const to = next.shift();
       if (from && to) {
-        getDirection(req, from, to)
-          .then(
-            ({ direction, nextStart }) => {
-              applyStartTime(req, [{
+        getDirection(req, from, to).then(({ direction, nextStart }) => {
+          applyStartTime(
+            req,
+            [
+              {
                 ...to,
                 start: nextStart
-              }].concat(next), plans.concat([{
+              }
+            ].concat(next),
+            plans.concat([
+              {
                 ...from,
-                end: moment(from.start).add(from.sojourn, 'minutes').format(),
+                end: moment(from.start)
+                  .add(from.sojourn, 'minutes')
+                  .format(),
                 transit: Math.ceil(direction.routes[0].legs[0].duration.value / 60),
                 direction: {
                   ...direction,
-                  page: `https://www.google.com/maps/dir/${from.place.lat},${from.place.lng}/${to.place.lat},${to.place.lng}/`
-                },
-              }]))
-                .then(res => resolve(res));
-            }
-          );
+                  page: `https://www.google.com/maps/dir/${from.place.lat},${from.place.lng}/${
+                    to.place.lat
+                  },${to.place.lng}/`
+                }
+              }
+            ])
+          ).then(res => resolve(res));
+        });
       } else {
         resolve(plans.concat([from]));
       }
@@ -277,30 +330,33 @@ export default function ({ app }) {
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.params.id}&limit=1000`)
         .then(response =>
-          Promise.all(response.body.items.map(plan =>
-            request
-              .get(`https://chaus.herokuapp.com/apis/monomi/places/${plan.place.id}`)
-              .then(
+          Promise.all(
+            response.body.items.map(plan =>
+              request.get(`https://chaus.herokuapp.com/apis/monomi/places/${plan.place.id}`).then(
                 json => ({
                   ...plan,
                   place: json.body
                 }),
                 () => console.error('# Fetch place error', plan.place.id)
               )
-          ))),
+            )
+          )
+        )
     ]).then(([itinerary, plans]) => {
-      applyStartTime(req, plans.sort((a, b) => (
-        a.order < b.order ? -1 :
-        a.order > b.order ? 1 : 0
-      )).map((plan, index) =>
-        (index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan)
-      ))
-        .then(plansWithDirection =>
-          res.json({
-            ...itinerary,
-            plans: plansWithDirection.filter(plan => plan)
-          })
-        );
+      applyStartTime(
+        req,
+        plans
+          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+          .map(
+            (plan, index) =>
+              index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan
+          )
+      ).then(plansWithDirection =>
+        res.json({
+          ...itinerary,
+          plans: plansWithDirection.filter(plan => plan)
+        })
+      );
     });
   });
 
@@ -312,10 +368,7 @@ export default function ({ app }) {
         start: moment(req.body.start).format(),
         user: req.user.id
       })
-      .then(response =>
-        res.json(response.body),
-        err => console.log(err) || res.json({})
-      );
+      .then(response => res.json(response.body), err => console.log(err) || res.json({}));
   });
 
   app.post('/apis/itineraries/:id', (req, res) => {
@@ -323,21 +376,24 @@ export default function ({ app }) {
       .post(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
       .send({
         ...req.body,
-        start: moment(req.body.start).format(),
+        start: moment(req.body.start).format()
       })
-      .then(response =>
-        res.json(response.body),
-        err => console.log(err) || res.json({})
-      );
+      .then(response => res.json(response.body), err => console.log(err) || res.json({}));
   });
 
   app.post('/apis/plans', (req, res) => {
     request
-      .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.body.itinerary}&limit=1000`)
-      .then(response => (response.body.items.sort((a, b) => (
-        a.order < b.order ? 1 :
-        a.order > b.order ? -1 : 0
-      ))[0] || { order: 0 }).order + 1)
+      .get(
+        `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.body.itinerary}&limit=1000`
+      )
+      .then(
+        response =>
+          (
+            response.body.items.sort(
+              (a, b) => (a.order < b.order ? 1 : a.order > b.order ? -1 : 0)
+            )[0] || { order: 0 }
+          ).order + 1
+      )
       .then(order =>
         request
           .post('https://chaus.herokuapp.com/apis/monomi/plans')
@@ -345,24 +401,20 @@ export default function ({ app }) {
             ...req.body,
             sojourn: 15,
             communication: 'driving',
-            order,
+            order
           })
-          .then(response =>
-            res.json(response.body)
-          )
+          .then(response => res.json(response.body))
       );
   });
 
   app.post('/apis/itineraries/:id/plans', (req, res) => {
-    Promise.all(req.body.items.map(plan =>
-      request
-        .post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`)
-        .send({
+    Promise.all(
+      req.body.items.map(plan =>
+        request.post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`).send({
           ...plan,
-          itinerary: req.params.id,
+          itinerary: req.params.id
         })
-    )).then(() =>
-      res.json({})
-    );
+      )
+    ).then(() => res.json({}));
   });
 }

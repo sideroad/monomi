@@ -11,79 +11,92 @@ import ModalCalendar from '../components/ModalCalendar';
 
 const ui = {
   // eslint-disable-next-line global-require
-  fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
+  fa: require('../css/koiki-ui/fa/less/font-awesome.less')
 };
 
 const styles = require('../css/itinerary.less');
 
-
-const DragHandle = SortableHandle(({ plan }) =>
+const DragHandle = SortableHandle(({ plan }) => (
   <div
     className={styles.image}
     style={{
       backgroundImage: `url(${plan.place.image})`
     }}
   />
-);
+));
 
-const SortableItem = SortableElement(({
-  plan,
-  onClickPlace,
-  onClickRemove,
-  onClickCommunication,
-  onChangeSojourn,
-  start,
-  onChangeItineraryTime
-}) =>
-  <li key={plan.id} className={styles.item}>
-    <div className={styles.place} >
-      <div className={styles.time}>
-        <div className={styles.start}>
-          {
-            moment(plan.start).isSame(moment(start)) ?
+const SortableItem = SortableElement(
+  ({
+    plan,
+    onClickPlace,
+    onClickRemove,
+    onClickCommunication,
+    onChangeSojourn,
+    start,
+    onChangeItineraryTime
+  }) => (
+    <li key={plan.id} className={styles.item}>
+      <div className={styles.place}>
+        <div className={styles.time}>
+          <div className={styles.start}>
+            {moment(plan.start).isSame(moment(start)) ? (
               <TimeControl
                 hours={moment(start).hours()}
                 minutes={moment(start).minutes()}
                 onSubmit={onChangeItineraryTime}
               />
-            :
+            ) : (
               moment(plan.start).format('HH:mm')
-          }</div>
-        <div className={styles.end}>{plan.end ? moment(plan.end).format('HH:mm') : ''}</div>
-      </div>
-      <DragHandle plan={plan} />
-      <div className={styles.right}>
-        <button
-          className={styles.name}
-          onClick={() => onClickPlace(plan.place)}
-        >
-          {plan.place.name}
-        </button>
-        <div className={styles.control}>
-          <DurationControl
-            min={plan.sojourn}
-            onSubmit={min => onChangeSojourn(plan, min)}
-          />
-          <button
-            className={styles.remove}
-            onClick={() => onClickRemove(plan.id)}
-          >
-            <i className={`${ui.fa.fa} ${ui.fa['fa-trash']}`} />
+            )}
+          </div>
+          <div className={styles.end}>{plan.end ? moment(plan.end).format('HH:mm') : ''}</div>
+        </div>
+        <DragHandle plan={plan} />
+        <div className={styles.right}>
+          <button className={styles.name} onClick={() => onClickPlace(plan.place)}>
+            {plan.place.name}
           </button>
+          <div className={styles.control}>
+            <DurationControl min={plan.sojourn} onSubmit={min => onChangeSojourn(plan, min)} />
+            <button className={styles.remove} onClick={() => onClickRemove(plan.id)}>
+              <i className={`${ui.fa.fa} ${ui.fa['fa-trash']}`} />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    {
-      plan.transit ?
-        <div className={styles.transit} >
-          <button className={`${styles.mode} ${plan.communication.id === 'walking' ? styles.activate : ''}`} onClick={() => onClickCommunication(plan.id, 'walking')}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-male']} ${plan.communication.id === 'walking' ? styles.activate : ''}`} />
+      {plan.transit ? (
+        <div className={styles.transit}>
+          <button
+            className={`${styles.mode} ${
+              plan.communication.id === 'walking' ? styles.activate : ''
+            }`}
+            onClick={() => onClickCommunication(plan.id, 'walking')}
+          >
+            <i
+              className={`${ui.fa.fa} ${ui.fa['fa-male']} ${
+                plan.communication.id === 'walking' ? styles.activate : ''
+              }`}
+            />
           </button>
-          <button className={`${styles.mode} ${plan.communication.id === 'driving' ? styles.activate : ''}`} onClick={() => onClickCommunication(plan.id, 'driving')}>
+          <button
+            className={`${styles.mode} ${
+              plan.communication.id === 'driving' ? styles.activate : ''
+            }`}
+            onClick={() => onClickCommunication(plan.id, 'driving')}
+          >
             <i className={`${ui.fa.fa} ${ui.fa['fa-car']}`} />
           </button>
-          <button className={`${styles.mode} ${plan.communication.id === 'transit' ? styles.activate : ''}`} onClick={() => onClickCommunication(plan.id, 'transit')}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-subway']} ${plan.communication.id === 'transit' ? styles.activate : ''}`} />
+          <button
+            className={`${styles.mode} ${
+              plan.communication.id === 'transit' ? styles.activate : ''
+            }`}
+            onClick={() => onClickCommunication(plan.id, 'transit')}
+          >
+            <i
+              className={`${ui.fa.fa} ${ui.fa['fa-subway']} ${
+                plan.communication.id === 'transit' ? styles.activate : ''
+              }`}
+            />
           </button>
           <a
             className={styles.link}
@@ -95,42 +108,47 @@ const SortableItem = SortableElement(({
           </a>
           <div className={styles.dashed} />
         </div>
-      : ''
-    }
-  </li>
+      ) : (
+        ''
+      )}
+    </li>
+  )
 );
 
-const SortableList = SortableContainer(({
-  plans,
-  onClickPlace,
-  onClickRemove,
-  onClickCommunication,
-  onChangeSojourn,
-  start,
-  onChangeItineraryTime,
-}) =>
-  <ul className={styles.list}>
-    {plans.map((plan, index) => (
-      <SortableItem
-        key={`plan-${index}-${plan.id}`}
-        index={index}
-        plan={plan}
-        start={start}
-        onClickRemove={onClickRemove}
-        onClickPlace={onClickPlace}
-        onClickCommunication={onClickCommunication}
-        onChangeSojourn={onChangeSojourn}
-        onChangeItineraryTime={onChangeItineraryTime}
-      />
-    ))}
-  </ul>);
+const SortableList = SortableContainer(
+  ({
+    plans,
+    onClickPlace,
+    onClickRemove,
+    onClickCommunication,
+    onChangeSojourn,
+    start,
+    onChangeItineraryTime
+  }) => (
+    <ul className={styles.list}>
+      {(plans || []).map((plan, index) => (
+        <SortableItem
+          key={`plan-${index}-${plan.id}`}
+          index={index}
+          plan={plan}
+          start={start}
+          onClickRemove={onClickRemove}
+          onClickPlace={onClickPlace}
+          onClickCommunication={onClickCommunication}
+          onChangeSojourn={onChangeSojourn}
+          onChangeItineraryTime={onChangeItineraryTime}
+        />
+      ))}
+    </ul>
+  )
+);
 
 class Itinerary extends Component {
   constructor(props) {
     super(props);
     this.state = {
       plans: props.plans,
-      openCalendar: false,
+      openCalendar: false
     };
     autoBind(this);
   }
@@ -138,14 +156,14 @@ class Itinerary extends Component {
   componentWillReceiveProps(nextProps) {
     if (!_.isEqual(this.state.plans, nextProps.plans)) {
       this.setState({
-        plans: nextProps.plans,
+        plans: nextProps.plans
       });
     }
   }
 
   onClickCalendar() {
     this.setState({
-      openCalendar: true,
+      openCalendar: true
     });
   }
 
@@ -160,7 +178,7 @@ class Itinerary extends Component {
         .format()
     );
     this.setState({
-      openCalendar: false,
+      openCalendar: false
     });
   }
 
@@ -173,7 +191,7 @@ class Itinerary extends Component {
         .format()
     );
     this.setState({
-      openCalendar: false,
+      openCalendar: false
     });
   }
 
@@ -181,15 +199,12 @@ class Itinerary extends Component {
     const plans = this.state.plans.slice(0).map(item => ({
       ...item,
       sojourn: plan.id === item.id ? min : item.sojourn,
-      changingSojourn: false,
+      changingSojourn: false
     }));
     this.setState({
-      plans,
+      plans
     });
-    this.props.onReplace(
-      this.props.id,
-      plans.filter(item => item.id === plan.id)
-    );
+    this.props.onReplace(this.props.id, plans.filter(item => item.id === plan.id));
   }
 
   onSortEnd({ oldIndex, newIndex }) {
@@ -197,10 +212,7 @@ class Itinerary extends Component {
       ...plan,
       order: index
     }));
-    this.props.onReplace(
-      this.props.id,
-      plans
-    );
+    this.props.onReplace(this.props.id, plans);
     this.setState({
       plans
     });
@@ -208,27 +220,22 @@ class Itinerary extends Component {
 
   openCalendar() {
     this.setState({
-      openCalendar: true,
+      openCalendar: true
     });
   }
 
   closeCalendar() {
     this.setState({
-      openCalendar: false,
+      openCalendar: false
     });
   }
 
   render() {
     return (
-      <div
-        className={styles.container}
-      >
+      <div className={styles.container}>
         <div className={styles.itinerary}>
           {this.props.name}
-          <button
-            className={styles.calendar}
-            onClick={this.openCalendar}
-          >
+          <button className={styles.calendar} onClick={this.openCalendar}>
             <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
           </button>
         </div>
@@ -268,7 +275,7 @@ Itinerary.propTypes = {
   onClickPlace: PropTypes.func.isRequired,
   onClickCommunication: PropTypes.func.isRequired,
   onChangeItineraryDate: PropTypes.func.isRequired,
-  onReplace: PropTypes.func.isRequired,
+  onReplace: PropTypes.func.isRequired
 };
 
 export default Itinerary;
