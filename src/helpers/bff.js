@@ -68,7 +68,7 @@ export default function ({ app }) {
       })
       .then((response) => {
         const location = response.body.result.geometry.location;
-        const photo = response.body.result.photos[0];
+        const photo = (response.body.result.photos || [])[0];
 
         return {
           ...response.body.result,
