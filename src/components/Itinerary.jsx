@@ -7,6 +7,7 @@ import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'r
 import { stringify } from '../helpers/time';
 import DurationControl from '../components/DurationControl';
 import TimeControl from '../components/TimeControl';
+import ModalDatePicker from '../components/ModalDatePicker';
 import ModalCalendar from '../components/ModalCalendar';
 
 const ui = {
@@ -117,15 +118,27 @@ const SortableItem = SortableElement(
 
 const SortableList = SortableContainer(
   ({
+    name,
     plans,
     onClickPlace,
     onClickRemove,
     onClickCommunication,
     onChangeSojourn,
     start,
-    onChangeItineraryTime
+    onChangeItineraryTime,
+    openDatePicker,
+    openCalendar
   }) => (
     <ul className={styles.list}>
+      <li className={styles.itinerary}>
+        {name}
+        <button className={styles.datePicker} onClick={openDatePicker}>
+          <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
+        </button>
+        <button className={styles.calendar} onClick={openCalendar}>
+          <i className={`${ui.fa.fa} ${ui.fa['fa-columns']}`} />
+        </button>
+      </li>
       {(plans || []).map((plan, index) => (
         <SortableItem
           key={`plan-${index}-${plan.id}`}
@@ -148,6 +161,7 @@ class Itinerary extends Component {
     super(props);
     this.state = {
       plans: props.plans,
+      openDatePicker: false,
       openCalendar: false
     };
     autoBind(this);
@@ -163,7 +177,7 @@ class Itinerary extends Component {
 
   onClickCalendar() {
     this.setState({
-      openCalendar: true
+      openDatePicker: true
     });
   }
 
@@ -178,7 +192,7 @@ class Itinerary extends Component {
         .format()
     );
     this.setState({
-      openCalendar: false
+      openDatePicker: false
     });
   }
 
@@ -191,7 +205,7 @@ class Itinerary extends Component {
         .format()
     );
     this.setState({
-      openCalendar: false
+      openDatePicker: false
     });
   }
 
@@ -218,6 +232,18 @@ class Itinerary extends Component {
     });
   }
 
+  openDatePicker() {
+    this.setState({
+      openDatePicker: true
+    });
+  }
+
+  closeDatePicker() {
+    this.setState({
+      openDatePicker: false
+    });
+  }
+
   openCalendar() {
     this.setState({
       openCalendar: true
@@ -233,34 +259,31 @@ class Itinerary extends Component {
   render() {
     return (
       <div className={styles.container}>
-        <div className={styles.itinerary}>
-          {this.props.name}
-          <button className={styles.calendar} onClick={this.openCalendar}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
-          </button>
-        </div>
         <SortableList
+          name={this.props.name}
           plans={this.state.plans}
           start={this.props.start}
           onSortEnd={this.onSortEnd}
           lockAxis="y"
-          lockToContainerEdges
           lockOffset={['0%', '100%']}
           helperClass={styles.dragging}
           pressDelay={200}
           useDragHandle
+          openDatePicker={this.openDatePicker}
+          openCalendar={this.openCalendar}
           onClickRemove={this.props.onClickRemove}
           onClickPlace={this.props.onClickPlace}
           onClickCommunication={this.props.onClickCommunication}
           onChangeSojourn={this.onChangeSojourn}
           onChangeItineraryTime={this.onChangeItineraryTime}
         />
-        <ModalCalendar
+        <ModalDatePicker
           date={moment(this.props.start).format('YYYY-MM-DD')}
-          opened={this.state.openCalendar}
+          opened={this.state.openDatePicker}
           onSelect={this.onSelectItineraryDate}
-          onClose={this.closeCalendar}
+          onClose={this.closeDatePicker}
         />
+        <ModalCalendar />
       </div>
     );
   }

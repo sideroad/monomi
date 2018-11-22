@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Input } from 'koiki-ui';
 import autoBind from 'react-autobind';
 import moment from 'moment';
-import ModalCalendar from '../components/ModalCalendar';
+import ModalDatePicker from '../components/ModalDatePicker';
 
 const styles = require('../css/itineraries.less');
 
@@ -105,7 +105,7 @@ class Itineraries extends Component {
             }
           </li>
         </ul>
-        <ModalCalendar
+        <ModalDatePicker
           opened={this.state.openCalendar}
           onSelect={this.onSelectItineraryDate}
           onClose={this.closeCalendar}

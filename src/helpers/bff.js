@@ -1,9 +1,16 @@
 import { proxy } from 'koiki';
-import request from 'superagent';
 import moment from 'moment';
 import polyline from '@mapbox/polyline';
+import request from 'superagent';
 import config from '../config';
 import { TAG, PLACE } from '../reducers/suggest';
+import redisModule from 'cache-service-redis';
+
+const redisCache = new redisModule({
+  redisEnv: 'MONOMI_REDISCLOUD_URL',
+  defaultExpiration: 604800
+});
+const cache = require('superagent-cache-plugin')(redisCache);
 
 const getPlacesByTag = req =>
   request
@@ -62,6 +69,7 @@ export default function ({ app }) {
           config.googleapis.key
         }&placeid=${req.query.placeid}`
       )
+      .use(cache)
       .set({
         ...req.headers,
         Host: config.googleapis.host
@@ -89,6 +97,7 @@ export default function ({ app }) {
             response =>
               request
                 .get(`https://chaus.herokuapp.com/apis/monomi/places/${response.body.id}`)
+                .use(cache)
                 .then(json => json.body),
             () =>
               request
@@ -105,7 +114,7 @@ export default function ({ app }) {
           .get(
             `https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${
               place.id
-            }limit=1000`
+            }&limit=1000`
           )
           .then(json =>
             res.json({
@@ -119,6 +128,7 @@ export default function ({ app }) {
     Promise.all([
       request
         .get(`https://chaus.herokuapp.com/apis/monomi/places/${req.params.id}`)
+        .use(cache)
         .then(response => response.body),
       request
         .get(
@@ -171,6 +181,7 @@ export default function ({ app }) {
             req.query.input
           )}*&limit=1000`
         )
+        .use(cache)
         .then(response => response.body.items)
         .then(tags =>
           Promise.all(
@@ -203,6 +214,7 @@ export default function ({ app }) {
             req.query.input
           )}*&limit=1000`
         )
+        .use(cache)
         .then(response =>
           response.body.items.map(item => ({
             ...item,
@@ -211,6 +223,7 @@ export default function ({ app }) {
         ),
       request
         .get(autoCompleteUrl)
+        .use(cache)
         .set({
           ...req.headers,
           Host: config.googleapis.host
@@ -267,6 +280,7 @@ export default function ({ app }) {
     console.log('# getDirection', requestUrl);
     return request
       .get(requestUrl)
+      .use(cache)
       .set({
         ...req.headers,
         Host: config.googleapis.host

@@ -24,6 +24,7 @@
     "babel-polyfill": "^6.3.14",
     "bezier": "^0.1.0",
     "body-parser": "^1.14.2",
+    "cache-service-redis": "^2.0.0",
     "compression": "^1.6.0",
     "cookie-parser": "^1.4.3",
     "deck.gl": "^4.1.2",
@@ -47,6 +48,7 @@
     "rc-slider": "^6.1.0",
     "react": "^15.4.2",
     "react-autobind": "^1.0.6",
+    "react-big-calendar": "^0.20.2",
     "react-dom": "^15.4.2",
     "react-fastclick": "^2.1.0",
     "react-helmet": "^2.3.1",
@@ -63,6 +65,8 @@
     "redux-connect": "^3.0.0",
     "serve-favicon": "^2.3.0",
     "superagent": "^3.5.0",
+    "superagent-cache": "^3.0.1",
+    "superagent-cache-plugin": "^2.0.1",
     "webworkify-webpack-dropin": "^1.1.9"
   },
   "devDependencies": {

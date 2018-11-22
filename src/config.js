@@ -40,6 +40,9 @@ module.exports = Object.assign(
       appId: process.env.MONOMI_GITHUB_CLIENT_ID,
       secret: process.env.MONOMI_GITHUB_SECRET_ID
     },
+    redis: {
+      url: process.env.MONOMI_REDISCLOUD_URL
+    },
     app: {
       base,
       host: appHost,
@@ -80,7 +83,8 @@ module.exports = Object.assign(
             href: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css'
           },
           { rel: 'stylesheet', type: 'text/css', href: '/css/recharts.css' },
-          { rel: 'stylesheet', type: 'text/css', href: '/css/normalize.css' }
+          { rel: 'stylesheet', type: 'text/css', href: '/css/normalize.css' },
+          { rel: 'stylesheet', type: 'text/css', href: '/css/react-big-calendar.css' }
         ]
       }
     }
