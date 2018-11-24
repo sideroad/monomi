@@ -20,7 +20,7 @@ export default {
       mode: 'cors',
       credentials: 'include',
       cache: {
-        server: true,
+        server: true
       }
     },
     find: {
@@ -45,7 +45,7 @@ export default {
       method: 'GET',
       cache: {
         client: true,
-        server: true,
+        server: true
       }
     }
   },
@@ -60,13 +60,13 @@ export default {
       url: `${config.app.base}/apis/favorites`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     remove: {
       url: `${config.app.base}/apis/favorites`,
       method: 'DELETE',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     }
   },
   itinerary: {
@@ -74,25 +74,25 @@ export default {
       url: `${config.app.base}/apis/itineraries`,
       method: 'GET',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     get: {
       url: `${config.app.base}/apis/itineraries/:id`,
       method: 'GET',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     add: {
       url: `${config.app.base}/apis/itineraries`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     update: {
       url: `${config.app.base}/apis/itineraries/:id`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     }
   },
   plan: {
@@ -100,25 +100,25 @@ export default {
       url: `${config.app.base}/apis/plans`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     remove: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/plans/:id',
+      url: `${config.app.base}/apis/plans/:id`,
       method: 'DELETE',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     update: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/plans/:id',
+      url: `${config.app.base}/apis/plans/:id`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     },
     replaces: {
       url: `${config.app.base}/apis/itineraries/:id/plans`,
       method: 'POST',
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'include'
     }
   }
 };

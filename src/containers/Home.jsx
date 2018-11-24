@@ -162,7 +162,7 @@ class Home extends Component {
   onClickAddPlan() {
     this.context.fetcher.plan
       .add({
-        itinerary: this.props.itinerary.id,
+        itinerary: this.props.itinerary,
         place: this.props.place.id
       })
       .then(() =>

@@ -70,7 +70,7 @@ module.exports = Object.assign(
           {
             rel: 'stylesheet',
             type: 'text/css',
-            href: 'https://fonts.googleapis.com/css?family=Ubuntu'
+            href: 'https://fonts.googleapis.com/css?family=Ubuntu:300,400'
           },
           {
             rel: 'stylesheet',

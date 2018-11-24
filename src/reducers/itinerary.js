@@ -1,5 +1,5 @@
 import polyline from '@mapbox/polyline';
-import _ from 'lodash';
+import flatten from 'lodash/flatten';
 
 const GETS_START = 'itinerary/GETS_START';
 const GETS_SUCCESS = 'itinerary/GETS_SUCCESS';
@@ -15,7 +15,7 @@ const initialState = {
   loaded: false,
   loading: false,
   openItinerary: false,
-  loopTime: 1000,
+  loopTime: 1000
 };
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
@@ -45,13 +45,13 @@ export default function reducer(state = initialState, action = {}) {
       };
     case GET_SUCCESS: {
       let count = 0;
-      const segments = _.flatten(action.res.body.plans.map(plan =>
-        (plan.direction ?
-          polyline
-            .decode(plan.direction.routes[0].overview_polyline.points)
-            .map(([lat, lng]) => [lng, lat, (count += 1)])
-        : [])
-      ));
+      const segments = flatten(
+        action.res.body.plans.map(plan =>
+          plan.points
+            ? polyline.decode(plan.points).map(([lat, lng]) => [lng, lat, (count += 1)])
+            : []
+        )
+      );
       return {
         ...state,
         loading: false,
@@ -64,7 +64,7 @@ export default function reducer(state = initialState, action = {}) {
           }
         ],
         loopTime: count,
-        openItinerary: true,
+        openItinerary: true
       };
     }
     case GET_FAIL:

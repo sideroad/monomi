@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import autoBind from 'react-autobind';
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
 import { stringify } from '../helpers/time';
@@ -99,12 +99,7 @@ const SortableItem = SortableElement(
               }`}
             />
           </button>
-          <a
-            className={styles.link}
-            href={plan.direction.page}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a className={styles.link} href={plan.page} target="_blank" rel="noopener noreferrer">
             {stringify(plan.transit)}
           </a>
           <div className={styles.dashed} />
@@ -131,13 +126,15 @@ const SortableList = SortableContainer(
   }) => (
     <ul className={styles.list}>
       <li className={styles.itinerary}>
-        {name}
-        <button className={styles.datePicker} onClick={openDatePicker}>
-          <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
-        </button>
-        <button className={styles.calendar} onClick={openCalendar}>
-          <i className={`${ui.fa.fa} ${ui.fa['fa-columns']}`} />
-        </button>
+        <div className={styles.title}>{name}</div>
+        <div className={styles.buttons}>
+          <button className={styles.datePicker} onClick={openDatePicker}>
+            <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
+          </button>
+          <button className={styles.calendar} onClick={openCalendar}>
+            <i className={`${ui.fa.fa} ${ui.fa['fa-columns']}`} />
+          </button>
+        </div>
       </li>
       {(plans || []).map((plan, index) => (
         <SortableItem
@@ -168,7 +165,7 @@ class Itinerary extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(this.state.plans, nextProps.plans)) {
+    if (!isEqual(this.state.plans, nextProps.plans)) {
       this.setState({
         plans: nextProps.plans
       });
@@ -179,6 +176,10 @@ class Itinerary extends Component {
     this.setState({
       openDatePicker: true
     });
+  }
+
+  onClickRemove(id) {
+    this.props.onRemove(id);
   }
 
   onSelectItineraryDate(start) {
@@ -271,7 +272,7 @@ class Itinerary extends Component {
           useDragHandle
           openDatePicker={this.openDatePicker}
           openCalendar={this.openCalendar}
-          onClickRemove={this.props.onClickRemove}
+          onClickRemove={this.onClickRemove}
           onClickPlace={this.props.onClickPlace}
           onClickCommunication={this.props.onClickCommunication}
           onChangeSojourn={this.onChangeSojourn}
@@ -283,7 +284,12 @@ class Itinerary extends Component {
           onSelect={this.onSelectItineraryDate}
           onClose={this.closeDatePicker}
         />
-        <ModalCalendar />
+        <ModalCalendar
+          date={this.props.start}
+          plans={this.state.plans}
+          opened={this.state.openCalendar}
+          onClose={this.closeCalendar}
+        />
       </div>
     );
   }
@@ -294,11 +300,11 @@ Itinerary.propTypes = {
   start: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   plans: PropTypes.array.isRequired,
-  onClickRemove: PropTypes.func.isRequired,
   onClickPlace: PropTypes.func.isRequired,
   onClickCommunication: PropTypes.func.isRequired,
   onChangeItineraryDate: PropTypes.func.isRequired,
-  onReplace: PropTypes.func.isRequired
+  onReplace: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired
 };
 
 export default Itinerary;

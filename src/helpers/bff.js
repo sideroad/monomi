@@ -281,22 +281,18 @@ export default function ({ app }) {
     return request
       .get(requestUrl)
       .use(cache)
-      .set({
-        ...req.headers,
-        Host: config.googleapis.host
-      })
       .then(
         response => ({
           direction: {
             ...response.body,
-            points: polyline.decode(response.body.routes[0].overview_polyline.points)
+            points: response.body.routes[0].overview_polyline.points
           },
           nextStart: moment(from.start)
             .add(from.sojourn, 'minutes')
             .add(response.body.routes[0].legs[0].duration.value, 'seconds')
             .format()
         }),
-        () => console.error('# Direction fetch has failed. ', requestUrl)
+        error => console.error('# Direction fetch has failed. ', requestUrl, error)
       );
   };
 
@@ -321,18 +317,26 @@ export default function ({ app }) {
                   .add(from.sojourn, 'minutes')
                   .format(),
                 transit: Math.ceil(direction.routes[0].legs[0].duration.value / 60),
-                direction: {
-                  ...direction,
-                  page: `https://www.google.com/maps/dir/${from.place.lat},${from.place.lng}/${
-                    to.place.lat
-                  },${to.place.lng}/`
-                }
+                points: direction.routes[0].overview_polyline.points,
+                page: `https://www.google.com/maps/dir/${from.place.lat},${from.place.lng}/${
+                  to.place.lat
+                },${to.place.lng}/`
               }
             ])
           ).then(res => resolve(res));
         });
       } else {
-        resolve(plans.concat([from]));
+        resolve(
+          plans.concat([
+            {
+              ...from,
+              transit: 0,
+              end: '',
+              points: '',
+              page: ''
+            }
+          ])
+        );
       }
     });
 
@@ -342,35 +346,17 @@ export default function ({ app }) {
         .get(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
         .then(response => response.body),
       request
-        .get(`https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.params.id}&limit=1000`)
-        .then(response =>
-          Promise.all(
-            response.body.items.map(plan =>
-              request.get(`https://chaus.herokuapp.com/apis/monomi/places/${plan.place.id}`).then(
-                json => ({
-                  ...plan,
-                  place: json.body
-                }),
-                () => console.error('# Fetch place error', plan.place.id)
-              )
-            )
-          )
+        .get(
+          `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
+            req.params.id
+          }&limit=1000&expands=place&orderBy=order`
         )
+        .then(response => response.body.items)
     ]).then(([itinerary, plans]) => {
-      applyStartTime(
-        req,
-        plans
-          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-          .map(
-            (plan, index) =>
-              index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan
-          )
-      ).then(plansWithDirection =>
-        res.json({
-          ...itinerary,
-          plans: plansWithDirection.filter(plan => plan)
-        })
-      );
+      res.json({
+        ...itinerary,
+        plans: plans.filter(plan => plan)
+      });
     });
   });
 
@@ -385,6 +371,63 @@ export default function ({ app }) {
       .then(response => res.json(response.body), err => console.log(err) || res.json({}));
   });
 
+  const reorderPlans = (req, res) => {
+    applyStartTime(
+      req,
+      req.body.items.map((plan, index) =>
+        index === 0
+          ? { ...plan, start: moment(req.body.itinerary.start).format(), order: index }
+          : {
+            ...plan,
+            order: index
+          }
+      )
+    )
+      .then(plansWithDirection =>
+        Promise.all(
+          plansWithDirection.map(plan =>
+            request.post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`).send({
+              ...plan,
+              place: plan.place.id,
+              communication: plan.communication.id,
+              itinerary: req.params.id
+            })
+          )
+        )
+      )
+      .then(() => res.json({}))
+      .catch(err => console.log(err));
+  };
+
+  const getAndReorderPlans = (req, res, planId, itinerary) => {
+    (itinerary
+      ? Promise.resolve(itinerary)
+      : request
+          .get(`https://chaus.herokuapp.com/apis/monomi/plans/${planId}?expands=itinerary`)
+          .then(plan => plan.body.itinerary)
+    ).then(itinerary =>
+      request
+        .get(
+          `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
+            itinerary.id
+          }&limit=1000&expands=place&orderBy=order`
+        )
+        .then(plans =>
+          reorderPlans(
+            {
+              ...req,
+              params: { id: itinerary.id },
+              body: {
+                itinerary,
+                items: plans.body.items
+              }
+            },
+            res
+          )
+        )
+    );
+  };
+
   app.post('/apis/itineraries/:id', (req, res) => {
     request
       .post(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
@@ -392,43 +435,76 @@ export default function ({ app }) {
         ...req.body,
         start: moment(req.body.start).format()
       })
-      .then(response => res.json(response.body), err => console.log(err) || res.json({}));
+      .then(response =>
+        request.get(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
+      )
+      .then(response => getAndReorderPlans(req, res, null, response.body));
   });
 
   app.post('/apis/plans', (req, res) => {
     request
       .get(
-        `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${req.body.itinerary}&limit=1000`
+        `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
+          req.body.itinerary.id
+        }&limit=1000&expands=place&orderBy=order`
       )
-      .then(
-        response =>
-          (
-            response.body.items.sort(
-              (a, b) => (a.order < b.order ? 1 : a.order > b.order ? -1 : 0)
-            )[0] || { order: 0 }
-          ).order + 1
-      )
-      .then(order =>
+      .then(response => ({
+        items: response.body.items,
+        order: response.body.items.length
+          ? response.body.items[response.body.items.length - 1].order + 1
+          : 0
+      }))
+      .then(({ items, order }) =>
         request
           .post('https://chaus.herokuapp.com/apis/monomi/plans')
           .send({
             ...req.body,
+            itinerary: req.body.itinerary.id,
             sojourn: 15,
             communication: 'driving',
             order
           })
-          .then(response => res.json(response.body))
+          .then(response => getAndReorderPlans(req, res, response.body.id))
+          .catch(err => console.log(err))
       );
   });
 
-  app.post('/apis/itineraries/:id/plans', (req, res) => {
-    Promise.all(
-      req.body.items.map(plan =>
-        request.post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`).send({
-          ...plan,
-          itinerary: req.params.id
-        })
-      )
-    ).then(() => res.json({}));
+  app.post('/apis/itineraries/:id/plans', reorderPlans);
+
+  app.post('/apis/plans/:id', (req, res) => {
+    request
+      .post(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`)
+      .send(req.body)
+      .then(() => getAndReorderPlans(req, res, req.params.id));
+  });
+
+  app.delete('/apis/plans/:id', (req, res) => {
+    request
+      .get(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}?expands=itinerary,place`)
+      .then(plan =>
+        request.delete(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`).then(() =>
+          request
+            .get(
+              `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
+                plan.body.itinerary.id
+              }&limit=1000&expands=place&orderBy=order`
+            )
+            .then(plans =>
+              reorderPlans(
+                {
+                  ...req,
+                  params: {
+                    id: plan.body.itinerary.id
+                  },
+                  body: {
+                    itinerary: plan.body.itinerary,
+                    items: plans.body.items
+                  }
+                },
+                res
+              )
+            )
+        )
+      );
   });
 }

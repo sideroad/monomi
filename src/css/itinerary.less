@@ -1,7 +1,8 @@
 @import "variables.less";
 
-.calendar, .datePicker {
-  margin-left: 1em;
+.calendar,
+.datePicker {
+  margin-left: 0.5em;
   outline: none;
   border: none;
   background: none;
@@ -13,7 +14,7 @@
   outline: none;
   border: none;
   height: 30px;
-  font-size: 1.25em;
+  font-size: 1.5em;
   background: @sumi;
   color: @gofun;
   width: 100%;
@@ -22,18 +23,38 @@
   align-items: center;
   top: 0;
   z-index: 4;
-  margin: 10px 0;
+  margin: 0 0 20px 0;
+}
+
+.title {
+  width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buttons {
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 568px) {
+  .buttons {
+    font-size: 1.2em;
+  }
 }
 
 .list {
   list-style: none;
   overflow-y: scroll; /* has to be scroll, not auto */
   -webkit-overflow-scrolling: touch;
-  padding: 0 30px;
-  min-height: calc(100vh - 40px);
-  margin: 0;
+  padding: 0;
+  margin: 15px;
   position: relative;
-  height: calc(~"100vh - 50px");
+  height: calc(~"100vh - 30px");
 }
 
 .item {
@@ -41,7 +62,7 @@
   height: 8em;
   z-index: 3;
   color: @gofun;
-  font-family: 'Ubuntu';
+  font-family: "Ubuntu";
   position: relative;
   font-size: 0.9em;
 }
@@ -52,7 +73,7 @@
   cursor: -webkit-grabbing;
 }
 
-.time{
+.time {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -77,7 +98,7 @@
   background-color: @sumi;
 }
 
-.image:hover{
+.image:hover {
   opacity: 0.8;
   cursor: -webkit-grab;
 }
@@ -99,7 +120,7 @@
   color: @maso;
 }
 
-.name{
+.name {
   display: flex;
   align-items: center;
   justify-content: left;
@@ -114,7 +135,7 @@
   height: 1.2em;
 }
 
-.mode{
+.mode {
   margin-right: 0.5em;
   color: @hai;
   outline: none;
@@ -128,11 +149,11 @@
   opacity: 1;
 }
 
-.transit{
+.transit {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 1.5em 0em;
+  margin: 1.5em 0;
 }
 
 .link {
@@ -143,7 +164,7 @@
   position: absolute;
   top: 0;
   left: 73px;
-  width: 0px;
+  width: 0;
   height: 100%;
   border: 2px dashed @gofun;
   opacity: 0.2;
