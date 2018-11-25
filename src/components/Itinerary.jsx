@@ -149,6 +149,7 @@ const SortableList = SortableContainer(
           onChangeItineraryTime={onChangeItineraryTime}
         />
       ))}
+      <li className={styles.item} />
     </ul>
   )
 );
