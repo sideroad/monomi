@@ -231,7 +231,7 @@ button.rbc-input::-moz-focus-inner {
   cursor: pointer;
   width: 100%;
   text-align: left;
-  font-size: 80%;
+  font-size: 100%;
   font-weight: 300;
 }
 
