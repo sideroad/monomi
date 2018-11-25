@@ -41,12 +41,6 @@
   align-items: center;
 }
 
-@media (max-width: 568px) {
-  .buttons {
-    font-size: 1.2em;
-  }
-}
-
 .list {
   list-style: none;
   overflow-y: scroll; /* has to be scroll, not auto */
@@ -169,4 +163,14 @@
   border: 2px dashed @gofun;
   opacity: 0.2;
   z-index: -1;
+}
+
+@media (max-width: 568px) {
+  .buttons {
+    font-size: 1.2em;
+  }
+
+  .item {
+    font-size: 1.2em;
+  }
 }
