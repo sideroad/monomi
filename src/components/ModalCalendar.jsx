@@ -72,7 +72,9 @@ class ModalCalendar extends Component {
           formats={{
             eventTimeRangeFormat: ({ start, end }) =>
               `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`,
-            timeGutterFormat: date => moment(date).format('HH:mm')
+            timeGutterFormat: date => moment(date).format('HH:mm'),
+            agendaTimeRangeFormat: ({ start, end }) =>
+              `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`
           }}
           onView={view =>
             this.setState({
