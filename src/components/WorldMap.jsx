@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DeckGL, { ScatterplotLayer } from 'deck.gl';
 import MapGL from 'react-map-gl';
-import TripsLayer from './trips-layer';
+import { TripsLayer } from '@deck.gl/experimental-layers';
 import config from '../config';
 
 const TOKEN = config.mapbox.token;
@@ -31,64 +31,69 @@ class WorldMap extends Component {
     const loopTime = this.props.loopTime * 10;
 
     this.setState({
-      time: (((timestamp % loopTime) / loopTime) * loopLength) || 0
+      time: ((timestamp % loopTime) / loopTime) * loopLength || 0
     });
     this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
   }
 
   render() {
     if (__SERVER__) {
-      return (<div />);
+      return <div />;
     }
     const layers = [
       new ScatterplotLayer({
         id: 'places',
         data: this.props.places
-          .concat([this.props.selected]
-            .filter(item => item.id)
-            .map(item => ({
-              ...item,
-              color: [230, 230, 230],
-              radius: 1,
-              position: [item.lng, item.lat, 0]
-            }))
+          .concat(
+            [this.props.selected]
+              .filter(item => item.id)
+              .map(item => ({
+                ...item,
+                color: [230, 230, 230],
+                radius: 1,
+                position: [item.lng, item.lat, 0]
+              }))
           )
-          .concat([this.props.current]
-            .filter(item => item.id)
-            .map(item => ({
-              ...item,
-              color: [170, 207, 83],
-              radius: 1,
-              position: [item.lng, item.lat, 0]
-            }))
+          .concat(
+            [this.props.current]
+              .filter(item => item.id)
+              .map(item => ({
+                ...item,
+                color: [170, 207, 83],
+                radius: 1,
+                position: [item.lng, item.lat, 0]
+              }))
           ),
+        getPosition: d => d.position,
+        getColor: d => d.color,
         opacity: 0.75,
         strokeWidth: 2,
         pickable: true,
         radiusScale: 25,
         radiusMinPixels: 2,
-        radiusMaxPixels: 15,
-      }),
+        radiusMaxPixels: 15
+      })
     ];
-    if (
-      this.props.routes.length &&
-      this.props.routes[0].segments.length > 1
-    ) {
-      layers.push(new TripsLayer({
-        id: 'routes',
-        data: this.props.routes,
-        getPath: d => d.segments,
-        getColor: () => [170, 207, 83],
-        opacity: 1,
-        strokeWidth: 100,
-        trailLength: 100,
-        currentTime: this.state.time
-      }));
+    if (this.props.routes.length && this.props.routes[0].segments.length > 1) {
+      layers.push(
+        new TripsLayer({
+          id: 'routes',
+          data: this.props.routes,
+          getPath: d => d.segments,
+          getColor: () => [170, 207, 83],
+          opacity: 1,
+          strokeWidth: 100,
+          trailLength: 100,
+          currentTime: this.state.time
+        })
+      );
     }
 
     return (
       <MapGL
-        ref={(elem) => { this.mapgl = elem; }}
+        ref={(elem) => {
+          this.mapgl = elem;
+        }}
         width={this.props.width}
         height={this.props.height}
         {...this.props.mapViewState}
@@ -122,14 +127,14 @@ WorldMap.propTypes = {
   onLayerClick: PropTypes.func.isRequired,
   onViewportChange: PropTypes.func.isRequired,
   routes: PropTypes.array.isRequired,
-  loopTime: PropTypes.number.isRequired,
+  loopTime: PropTypes.number.isRequired
 };
 
 WorldMap.defaultProps = {
   width: undefined,
   height: undefined,
   selected: {},
-  current: {},
+  current: {}
 };
 
 export default WorldMap;

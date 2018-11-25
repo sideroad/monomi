@@ -18,11 +18,12 @@ const ItineraryContainer = (props, context) => (
             props.setPlace(res.body);
           });
       }}
-      onClickCommunication={(id, communication) => {
+      onChangePlan={(plan) => {
         context.fetcher.plan
           .update({
-            id,
-            communication
+            id: plan.id,
+            sojourn: plan.sojourn,
+            communication: plan.communication.id || plan.communication
           })
           .then(() =>
             context.fetcher.itinerary.get({

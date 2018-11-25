@@ -71,7 +71,7 @@ const SortableItem = SortableElement(
             className={`${styles.mode} ${
               plan.communication.id === 'walking' ? styles.activate : ''
             }`}
-            onClick={() => onClickCommunication(plan.id, 'walking')}
+            onClick={() => onClickCommunication(plan, 'walking')}
           >
             <i
               className={`${ui.fa.fa} ${ui.fa['fa-male']} ${
@@ -83,7 +83,7 @@ const SortableItem = SortableElement(
             className={`${styles.mode} ${
               plan.communication.id === 'driving' ? styles.activate : ''
             }`}
-            onClick={() => onClickCommunication(plan.id, 'driving')}
+            onClick={() => onClickCommunication(plan, 'driving')}
           >
             <i className={`${ui.fa.fa} ${ui.fa['fa-car']}`} />
           </button>
@@ -91,7 +91,7 @@ const SortableItem = SortableElement(
             className={`${styles.mode} ${
               plan.communication.id === 'transit' ? styles.activate : ''
             }`}
-            onClick={() => onClickCommunication(plan.id, 'transit')}
+            onClick={() => onClickCommunication(plan, 'transit')}
           >
             <i
               className={`${ui.fa.fa} ${ui.fa['fa-subway']} ${
@@ -219,7 +219,24 @@ class Itinerary extends Component {
     this.setState({
       plans
     });
-    this.props.onReplace(this.props.id, plans.filter(item => item.id === plan.id));
+    this.props.onChangePlan({
+      ...plan,
+      sojourn: min
+    });
+  }
+
+  onClickCommunication(plan, communication) {
+    const plans = this.state.plans.slice(0).map(item => ({
+      ...item,
+      communication: plan.id === item.id ? communication : item.communication
+    }));
+    this.setState({
+      plans
+    });
+    this.props.onChangePlan({
+      ...plan,
+      communication
+    });
   }
 
   onSortEnd({ oldIndex, newIndex }) {
@@ -274,7 +291,7 @@ class Itinerary extends Component {
           openCalendar={this.openCalendar}
           onClickRemove={this.onClickRemove}
           onClickPlace={this.props.onClickPlace}
-          onClickCommunication={this.props.onClickCommunication}
+          onClickCommunication={this.onClickCommunication}
           onChangeSojourn={this.onChangeSojourn}
           onChangeItineraryTime={this.onChangeItineraryTime}
         />
@@ -301,10 +318,10 @@ Itinerary.propTypes = {
   name: PropTypes.string.isRequired,
   plans: PropTypes.array.isRequired,
   onClickPlace: PropTypes.func.isRequired,
-  onClickCommunication: PropTypes.func.isRequired,
   onChangeItineraryDate: PropTypes.func.isRequired,
   onReplace: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired
+  onRemove: PropTypes.func.isRequired,
+  onChangePlan: PropTypes.func.isRequired
 };
 
 export default Itinerary;

@@ -99,10 +99,12 @@ class Home extends Component {
   }
 
   onResize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+    if (typeof window !== 'undefined') {
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    }
   }
 
   onFocusPlaceFinder() {
