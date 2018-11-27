@@ -3,7 +3,7 @@ import config from './config';
 export default {
   place: {
     post: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/places',
+      url: 'https://chaus.now.sh/apis/monomi/places',
       method: 'POST',
       mode: 'cors',
       credentials: 'include'
@@ -41,7 +41,7 @@ export default {
   },
   tagging: {
     gets: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/taggings',
+      url: 'https://chaus.now.sh/apis/monomi/taggings',
       method: 'GET',
       cache: {
         client: true,
@@ -51,7 +51,7 @@ export default {
   },
   user: {
     post: {
-      url: 'https://chaus.herokuapp.com/apis/monomi/users',
+      url: 'https://chaus.now.sh/apis/monomi/users',
       method: 'POST'
     }
   },
