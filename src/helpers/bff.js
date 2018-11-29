@@ -1,10 +1,9 @@
 import { proxy } from 'koiki';
 import moment from 'moment';
-import polyline from '@mapbox/polyline';
 import request from 'superagent';
+import redisModule from 'cache-service-redis';
 import config from '../config';
 import { TAG, PLACE } from '../reducers/suggest';
-import redisModule from 'cache-service-redis';
 
 const redisCache = new redisModule({
   redisEnv: 'MONOMI_REDISCLOUD_URL',
@@ -12,6 +11,7 @@ const redisCache = new redisModule({
 });
 const cache = require('superagent-cache-plugin')(redisCache);
 
+const itineraryCache = {};
 const getPlacesByTag = req =>
   request
     .get('https://chaus.now.sh/apis/monomi/taggings')
@@ -334,7 +334,22 @@ export default function ({ app }) {
       }
     });
 
+  app.post('/apis/itineraries', (req, res) => {
+    request
+      .post('https://chaus.now.sh/apis/monomi/itineraries')
+      .send({
+        ...req.body,
+        start: moment(req.body.start).format(),
+        user: req.user.id
+      })
+      .then(response => res.json(response.body), err => console.log(err) || res.json({}));
+  });
+
   app.get('/apis/itineraries/:id', (req, res) => {
+    if (itineraryCache[req.params.id]) {
+      res.json(itineraryCache[req.params.id]);
+      return;
+    }
     Promise.all([
       request
         .get(`https://chaus.now.sh/apis/monomi/itineraries/${req.params.id}`)
@@ -347,80 +362,22 @@ export default function ({ app }) {
         )
         .then(response => response.body.items)
     ]).then(([itinerary, plans]) => {
-      res.json({
-        ...itinerary,
-        plans: plans.filter(plan => plan)
+      applyStartTime(
+        req,
+        plans
+          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+          .map((plan, index) =>
+            index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan
+          )
+      ).then((plansWithDirection) => {
+        itineraryCache[req.params.id] = {
+          ...itinerary,
+          plans: plansWithDirection.filter(plan => plan)
+        };
+        res.json(itineraryCache[req.params.id]);
       });
     });
   });
-
-  app.post('/apis/itineraries', (req, res) => {
-    request
-      .post('https://chaus.now.sh/apis/monomi/itineraries')
-      .send({
-        ...req.body,
-        start: moment(req.body.start).format(),
-        user: req.user.id
-      })
-      .then(response => res.json(response.body), err => console.log(err) || res.json({}));
-  });
-
-  const reorderPlans = (req, res) => {
-    applyStartTime(
-      req,
-      req.body.items.map((plan, index) =>
-        index === 0
-          ? { ...plan, start: moment(req.body.itinerary.start).format(), order: index }
-          : {
-            ...plan,
-            order: index
-          }
-      )
-    )
-      .then(plansWithDirection =>
-        Promise.all(
-          plansWithDirection.map(plan =>
-            request.post(`https://chaus.now.sh/apis/monomi/plans/${plan.id}`).send({
-              ...plan,
-              place: plan.place.id,
-              communication: plan.communication.id,
-              itinerary: req.params.id
-            })
-          )
-        )
-      )
-      .then(() => res.json({}))
-      .catch(err => console.log(err));
-  };
-
-  const getAndReorderPlans = (req, res, planId, itinerary) => {
-    (itinerary
-      ? Promise.resolve(itinerary)
-      : request
-          .get(`https://chaus.now.sh/apis/monomi/plans/${planId}?expands=itinerary`)
-          .then(plan => plan.body.itinerary)
-    ).then(itinerary =>
-      request
-        .get(
-          `https://chaus.now.sh/apis/monomi/plans?itinerary=${
-            itinerary.id
-          }&limit=1000&expands=place&orderBy=order`
-        )
-        .then(plans =>
-          reorderPlans(
-            {
-              ...req,
-              params: { id: itinerary.id },
-              body: {
-                itinerary,
-                items: plans.body.items
-              }
-            },
-            res
-          )
-        )
-    );
-  };
 
   app.post('/apis/itineraries/:id', (req, res) => {
     request
@@ -429,10 +386,10 @@ export default function ({ app }) {
         ...req.body,
         start: moment(req.body.start).format()
       })
-      .then(response =>
-        request.get(`https://chaus.now.sh/apis/monomi/itineraries/${req.params.id}`)
-      )
-      .then(response => getAndReorderPlans(req, res, null, response.body));
+      .then(() => {
+        itineraryCache[req.params.id] = undefined;
+        res.json({});
+      });
   });
 
   app.post('/apis/plans', (req, res) => {
@@ -442,13 +399,12 @@ export default function ({ app }) {
           req.body.itinerary.id
         }&limit=1000&expands=place&orderBy=order`
       )
-      .then(response => ({
-        items: response.body.items,
-        order: response.body.items.length
+      .then(response =>
+        response.body.items.length
           ? response.body.items[response.body.items.length - 1].order + 1
           : 0
-      }))
-      .then(({ items, order }) =>
+      )
+      .then(order =>
         request
           .post('https://chaus.now.sh/apis/monomi/plans')
           .send({
@@ -458,47 +414,49 @@ export default function ({ app }) {
             communication: 'driving',
             order
           })
-          .then(response => getAndReorderPlans(req, res, response.body.id))
+          .then(() => {
+            itineraryCache[req.body.itinerary.id] = undefined;
+            res.json({});
+          })
           .catch(err => console.log(err))
       );
   });
 
-  app.post('/apis/itineraries/:id/plans', reorderPlans);
+  app.post('/apis/itineraries/:id/plans', (req, res) => {
+    Promise.all(
+      req.body.items.map(plan =>
+        request.post(`https://chaus.now.sh/apis/monomi/plans/${plan.id}`).send({
+          ...plan,
+          place: plan.place.id,
+          communication: plan.communication.id,
+          itinerary: req.params.id
+        })
+      )
+    )
+      .then(() => {
+        itineraryCache[req.params.id] = undefined;
+        res.json({});
+      })
+      .catch(err => console.log(err));
+  });
 
   app.post('/apis/plans/:id', (req, res) => {
     request
       .post(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`)
       .send(req.body)
-      .then(() => getAndReorderPlans(req, res, req.params.id));
+      .then(() => request.get(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`))
+      .then((response) => {
+        itineraryCache[response.body.itinerary.id] = undefined;
+        res.json({});
+      });
   });
 
   app.delete('/apis/plans/:id', (req, res) => {
-    request
-      .get(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}?expands=itinerary,place`)
-      .then(plan =>
-        request.delete(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`).then(() =>
-          request
-            .get(
-              `https://chaus.now.sh/apis/monomi/plans?itinerary=${
-                plan.body.itinerary.id
-              }&limit=1000&expands=place&orderBy=order`
-            )
-            .then(plans =>
-              reorderPlans(
-                {
-                  ...req,
-                  params: {
-                    id: plan.body.itinerary.id
-                  },
-                  body: {
-                    itinerary: plan.body.itinerary,
-                    items: plans.body.items
-                  }
-                },
-                res
-              )
-            )
-        )
-      );
+    request.get(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`).then((response) => {
+      request.delete(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`).then(() => {
+        itineraryCache[response.body.itinerary.id] = undefined;
+        res.json({});
+      });
+    });
   });
 }
