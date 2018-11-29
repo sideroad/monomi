@@ -1,7 +1,6 @@
 @import "variables.less";
 
-.calendar,
-.datePicker {
+.icon {
   margin-left: 0.5em;
   outline: none;
   border: none;
@@ -53,7 +52,6 @@
 
 .item {
   list-style: none;
-  height: 8em;
   z-index: 3;
   color: @gofun;
   font-family: "Ubuntu";
@@ -74,6 +72,11 @@
   justify-content: space-between;
   font-size: 1em;
   margin-right: 1em;
+}
+
+.locked {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .place {
@@ -143,6 +146,10 @@
   opacity: 1;
 }
 
+.mode:disabled {
+  color: @gofun;
+}
+
 .transit {
   display: flex;
   align-items: center;
@@ -156,7 +163,6 @@
 
 .dashed {
   position: absolute;
-  top: 0;
   left: 73px;
   width: 0;
   height: 100%;

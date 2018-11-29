@@ -6,7 +6,7 @@ import { stringify } from 'koiki';
 import uris from '../uris';
 import Itineraries from '../components/Itineraries';
 
-const ItinerariesContainer = (props, context) =>
+const ItinerariesContainer = (props, context) => (
   <div>
     <Itineraries
       itineraries={props.itineraries}
@@ -14,17 +14,15 @@ const ItinerariesContainer = (props, context) =>
         props.push(stringify(uris.pages.itinerary, { lang: context.lang, id: itinerary.id }));
       }}
       onAddItinerary={(itinerary) => {
-        context.fetcher.itinerary.add(itinerary)
-          .then(() =>
-            context.fetcher.itinerary.gets()
-          );
+        context.fetcher.itinerary.add(itinerary).then(() => context.fetcher.itinerary.gets());
       }}
     />
-  </div>;
+  </div>
+);
 
 ItinerariesContainer.propTypes = {
   itineraries: PropTypes.array.isRequired,
-  push: PropTypes.func.isRequired,
+  push: PropTypes.func.isRequired
 };
 
 ItinerariesContainer.contextTypes = {
@@ -40,12 +38,14 @@ const connected = connect(
   { push }
 )(ItinerariesContainer);
 
-const asynced = asyncConnect([{
-  promise: ({ helpers: { fetcher } }) => {
-    const promises = [];
-    promises.push(fetcher.itinerary.gets());
-    return Promise.all(promises);
+const asynced = asyncConnect([
+  {
+    promise: ({ helpers: { fetcher } }) => {
+      const promises = [];
+      promises.push(fetcher.itinerary.gets());
+      return Promise.all(promises);
+    }
   }
-}])(connected);
+])(connected);
 
 export default asynced;

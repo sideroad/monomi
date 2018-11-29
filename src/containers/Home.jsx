@@ -330,7 +330,7 @@ class Home extends Component {
             image={this.props.place.image}
             link={this.props.place.link}
             favorite={this.props.place.favorite}
-            showItinerary={this.props.openItinerary}
+            showItinerary={this.props.openItinerary && !this.props.locked}
             onClickFavorite={this.onClickFavorite}
             onClickAddPlan={this.onClickAddPlan}
           />
@@ -355,6 +355,7 @@ Home.propTypes = {
   disableTrace: PropTypes.func.isRequired,
   trace: PropTypes.bool.isRequired,
   authed: PropTypes.bool.isRequired,
+  locked: PropTypes.bool.isRequired,
   user: PropTypes.object.isRequired,
   filtered: PropTypes.bool.isRequired,
   toggleFilter: PropTypes.func.isRequired,
@@ -387,6 +388,7 @@ const connected = connect(
     authed: state.user.authed,
     user: state.user.item,
     itinerary: state.itinerary.item,
+    locked: state.itinerary.locked,
     routes: state.itinerary.routes,
     loopTime: state.itinerary.loopTime,
     openItinerary: state.itinerary.openItinerary,

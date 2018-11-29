@@ -7,6 +7,7 @@ import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'r
 import { stringify } from '../helpers/time';
 import DurationControl from '../components/DurationControl';
 import TimeControl from '../components/TimeControl';
+import Plan from '../components/Plan';
 import ModalDatePicker from '../components/ModalDatePicker';
 import ModalCalendar from '../components/ModalCalendar';
 
@@ -17,11 +18,12 @@ const ui = {
 
 const styles = require('../css/itinerary.less');
 
-const DragHandle = SortableHandle(({ plan }) => (
+const DragHandle = SortableHandle(({ plan, locked }) => (
   <div
     className={styles.image}
     style={{
-      backgroundImage: `url(${plan.place.image})`
+      backgroundImage: `url(${plan.place.image})`,
+      cursor: locked ? 'auto' : '-webkit-grab'
     }}
   />
 ));
@@ -29,6 +31,7 @@ const DragHandle = SortableHandle(({ plan }) => (
 const SortableItem = SortableElement(
   ({
     plan,
+    locked,
     onClickPlace,
     onClickRemove,
     onClickCommunication,
@@ -39,8 +42,8 @@ const SortableItem = SortableElement(
     <li key={plan.id} className={styles.item}>
       <div className={styles.place}>
         <div className={styles.time}>
-          <div className={styles.start}>
-            {moment(plan.start).isSame(moment(start)) ? (
+          <div className={`${styles.start} ${locked ? styles.locked : ''}`}>
+            {moment(plan.start).isSame(moment(start)) && !locked ? (
               <TimeControl
                 hours={moment(start).hours()}
                 minutes={moment(start).minutes()}
@@ -50,62 +53,87 @@ const SortableItem = SortableElement(
               moment(plan.start).format('HH:mm')
             )}
           </div>
-          <div className={styles.end}>{plan.end ? moment(plan.end).format('HH:mm') : ''}</div>
-        </div>
-        <DragHandle plan={plan} />
-        <div className={styles.right}>
-          <button className={styles.name} onClick={() => onClickPlace(plan.place)}>
-            {plan.place.name}
-          </button>
-          <div className={styles.control}>
-            <DurationControl min={plan.sojourn} onSubmit={min => onChangeSojourn(plan, min)} />
-            <button className={styles.remove} onClick={() => onClickRemove(plan.id)}>
-              <i className={`${ui.fa.fa} ${ui.fa['fa-trash']}`} />
-            </button>
+          <div className={`${styles.end} ${locked ? styles.locked : ''}`}>
+            {plan.end ? moment(plan.end).format('HH:mm') : ''}
           </div>
         </div>
+        {locked ? (
+          <Plan plan={plan} onClick={() => onClickPlace(plan.place)} />
+        ) : (
+          <DragHandle plan={plan} locked={locked} />
+        )}
+        {!locked ? (
+          <div className={styles.right}>
+            <button className={styles.name} onClick={() => onClickPlace(plan.place)}>
+              {plan.place.name}
+            </button>
+            <div className={styles.control}>
+              {!locked ? (
+                <DurationControl
+                  disabled={locked}
+                  min={plan.sojourn}
+                  onSubmit={min => onChangeSojourn(plan, min)}
+                />
+              ) : null}
+              {!locked ? (
+                <button className={styles.remove} onClick={() => onClickRemove(plan.id)}>
+                  <i className={`${ui.fa.fa} ${ui.fa['fa-trash']}`} />
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
       {plan.transit ? (
         <div className={styles.transit}>
-          <button
-            className={`${styles.mode} ${
-              plan.communication.id === 'walking' ? styles.activate : ''
-            }`}
-            onClick={() => onClickCommunication(plan, 'walking')}
-          >
-            <i
-              className={`${ui.fa.fa} ${ui.fa['fa-male']} ${
+          {!locked || plan.communication.id === 'walking' ? (
+            <button
+              className={`${styles.mode} ${
                 plan.communication.id === 'walking' ? styles.activate : ''
               }`}
-            />
-          </button>
-          <button
-            className={`${styles.mode} ${
-              plan.communication.id === 'driving' ? styles.activate : ''
-            }`}
-            onClick={() => onClickCommunication(plan, 'driving')}
-          >
-            <i className={`${ui.fa.fa} ${ui.fa['fa-car']}`} />
-          </button>
-          <button
-            className={`${styles.mode} ${
-              plan.communication.id === 'transit' ? styles.activate : ''
-            }`}
-            onClick={() => onClickCommunication(plan, 'transit')}
-          >
-            <i
-              className={`${ui.fa.fa} ${ui.fa['fa-subway']} ${
+              disabled={locked}
+              onClick={() => onClickCommunication(plan, 'walking')}
+            >
+              <i
+                className={`${ui.fa.fa} ${ui.fa['fa-male']} ${
+                  plan.communication.id === 'walking' ? styles.activate : ''
+                }`}
+              />
+            </button>
+          ) : null}
+          {!locked || plan.communication.id === 'driving' ? (
+            <button
+              className={`${styles.mode} ${
+                plan.communication.id === 'driving' ? styles.activate : ''
+              }`}
+              disabled={locked}
+              onClick={() => onClickCommunication(plan, 'driving')}
+            >
+              <i className={`${ui.fa.fa} ${ui.fa['fa-car']}`} />
+            </button>
+          ) : null}
+          {!locked || plan.communication.id === 'transit' ? (
+            <button
+              className={`${styles.mode} ${
                 plan.communication.id === 'transit' ? styles.activate : ''
               }`}
-            />
-          </button>
+              disabled={locked}
+              onClick={() => onClickCommunication(plan, 'transit')}
+            >
+              <i
+                className={`${ui.fa.fa} ${ui.fa['fa-subway']} ${
+                  plan.communication.id === 'transit' ? styles.activate : ''
+                }`}
+              />
+            </button>
+          ) : null}
           <a className={styles.link} href={plan.page} target="_blank" rel="noopener noreferrer">
             {stringify(plan.transit)}
           </a>
           <div className={styles.dashed} />
         </div>
       ) : (
-        ''
+        <div className={styles.transit}>&nbsp;</div>
       )}
     </li>
   )
@@ -115,6 +143,8 @@ const SortableList = SortableContainer(
   ({
     name,
     plans,
+    locked,
+    onClickLock,
     onClickPlace,
     onClickRemove,
     onClickCommunication,
@@ -128,12 +158,18 @@ const SortableList = SortableContainer(
       <li className={styles.itinerary}>
         <div className={styles.title}>{name}</div>
         <div className={styles.buttons}>
-          <button className={styles.datePicker} onClick={openDatePicker}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
+          <button className={styles.icon} onClick={onClickLock}>
+            <i className={`${ui.fa.fa} ${ui.fa[locked ? 'fa-lock' : 'fa-unlock']}`} />
           </button>
-          <button className={styles.calendar} onClick={openCalendar}>
-            <i className={`${ui.fa.fa} ${ui.fa['fa-columns']}`} />
-          </button>
+          {locked ? (
+            <button className={styles.icon} onClick={openCalendar}>
+              <i className={`${ui.fa.fa} ${ui.fa['fa-columns']}`} />
+            </button>
+          ) : (
+            <button className={styles.icon} onClick={openDatePicker}>
+              <i className={`${ui.fa.fa} ${ui.fa['fa-calendar']}`} />
+            </button>
+          )}
         </div>
       </li>
       {(plans || []).map((plan, index) => (
@@ -142,6 +178,8 @@ const SortableList = SortableContainer(
           index={index}
           plan={plan}
           start={start}
+          locked={locked}
+          disabled={locked}
           onClickRemove={onClickRemove}
           onClickPlace={onClickPlace}
           onClickCommunication={onClickCommunication}
@@ -288,6 +326,8 @@ class Itinerary extends Component {
           helperClass={styles.dragging}
           pressDelay={200}
           useDragHandle
+          locked={this.props.locked}
+          onClickLock={this.props.onClickLock}
           openDatePicker={this.openDatePicker}
           openCalendar={this.openCalendar}
           onClickRemove={this.onClickRemove}
@@ -318,6 +358,8 @@ Itinerary.propTypes = {
   start: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   plans: PropTypes.array.isRequired,
+  locked: PropTypes.bool.isRequired,
+  onClickLock: PropTypes.func.isRequired,
   onClickPlace: PropTypes.func.isRequired,
   onChangeItineraryDate: PropTypes.func.isRequired,
   onReplace: PropTypes.func.isRequired,

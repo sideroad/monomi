@@ -4,5 +4,6 @@
   "regions": ["sfo1"],
   "features": {
     "cloud": "v1"
-  }
+  },
+  "alias": ["monomi.now.sh"]
 }

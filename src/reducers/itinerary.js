@@ -1,6 +1,7 @@
 import polyline from '@mapbox/polyline';
 import flatten from 'lodash/flatten';
 
+const LOCK = 'itinerary/LOCK';
 const GETS_START = 'itinerary/GETS_START';
 const GETS_SUCCESS = 'itinerary/GETS_SUCCESS';
 const GETS_FAIL = 'itinerary/GETS_FAIL';
@@ -12,6 +13,7 @@ const initialState = {
   item: {},
   items: [],
   routes: [],
+  locked: true,
   loaded: false,
   loading: false,
   openItinerary: false,
@@ -19,6 +21,11 @@ const initialState = {
 };
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
+    case LOCK:
+      return {
+        ...state,
+        locked: !state.locked
+      };
     case GETS_START:
       return {
         ...state,
@@ -77,4 +84,10 @@ export default function reducer(state = initialState, action = {}) {
     default:
       return state;
   }
+}
+
+export function lock() {
+  return {
+    type: LOCK
+  };
 }

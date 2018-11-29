@@ -7,7 +7,7 @@ const styles = require('../css/duration-control.less');
 
 const ui = {
   // eslint-disable-next-line global-require
-  fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
+  fa: require('../css/koiki-ui/fa/less/font-awesome.less')
 };
 
 class DurationControl extends Component {
@@ -17,14 +17,13 @@ class DurationControl extends Component {
     this.state = {
       hours,
       minutes,
-      changing: false,
+      changing: false
     };
     autoBind(this);
   }
 
   componentDidMount() {
-    this.wrappedHandleClickOutside = evt =>
-      this.handleClickOutside(evt, this.formDOM);
+    this.wrappedHandleClickOutside = evt => this.handleClickOutside(evt, this.formDOM);
     document.addEventListener('click', this.wrappedHandleClickOutside, true);
   }
 
@@ -74,42 +73,42 @@ class DurationControl extends Component {
   render() {
     return (
       <div>
-        {
-          this.state.changing ?
-            <form
-              ref={(elem) => { this.formDOM = elem; }}
-              className={styles.control}
-              onSubmit={this.props.onSubmit}
-            >
-              <input
-                className={styles.hrs}
-                type="number"
-                value={this.state.hours}
-                onChange={this.onChangeHours}
-                onKeyDown={this.onKeyDown}
-                min={0}
-                max={24}
-              /> hrs
-              <input
-                className={styles.min}
-                type="number"
-                value={this.state.minutes}
-                onChange={this.onChangeMinutes}
-                onKeyDown={this.onKeyDown}
-                step={5}
-                min={0}
-                max={55}
-              /> min
-            </form>
-          :
-            <button
-              className={styles.duration}
-              onClick={this.onClick}
-            >
-              <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
-              {stringify(this.props.min)}
-            </button>
-      }
+        {this.state.changing ? (
+          <form
+            ref={(elem) => {
+              this.formDOM = elem;
+            }}
+            className={styles.control}
+            onSubmit={this.props.onSubmit}
+          >
+            <input
+              className={styles.hrs}
+              type="number"
+              value={this.state.hours}
+              onChange={this.onChangeHours}
+              onKeyDown={this.onKeyDown}
+              min={0}
+              max={24}
+            />{' '}
+            hrs
+            <input
+              className={styles.min}
+              type="number"
+              value={this.state.minutes}
+              onChange={this.onChangeMinutes}
+              onKeyDown={this.onKeyDown}
+              step={5}
+              min={0}
+              max={55}
+            />{' '}
+            min
+          </form>
+        ) : (
+          <button className={styles.duration} onClick={this.onClick}>
+            <i className={`${ui.fa.fa} ${ui.fa['fa-clock-o']}`} />
+            {stringify(this.props.min)}
+          </button>
+        )}
       </div>
     );
   }
@@ -117,7 +116,7 @@ class DurationControl extends Component {
 
 DurationControl.propTypes = {
   min: PropTypes.number.isRequired,
-  onSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired
 };
 
 export default DurationControl;
