@@ -12,6 +12,7 @@ import WorldMap from '../components/WorldMap';
 import SideBar from '../components/SideBar';
 import Place from '../components/Place';
 import FavoriteFilter from '../components/FavoriteFilter';
+import Loading from '../components/Loading';
 import { TAG } from '../reducers/suggest';
 import {
   initialized as placeInitialized,
@@ -307,6 +308,7 @@ class Home extends Component {
         >
           {this.props.children}
         </SideBar>
+        {this.props.loading ? <Loading /> : ''}
         <WorldMap
           ref={(elem) => {
             this.worldMap = elem;
@@ -316,7 +318,7 @@ class Home extends Component {
           height={this.state.height}
           places={this.props.places}
           routes={this.props.routes}
-          loopTime={this.props.loopTime}
+          loopLength={this.props.loopLength}
           selected={this.props.place}
           current={this.props.current}
           onViewportChange={this.onViewportChange}
@@ -356,13 +358,14 @@ Home.propTypes = {
   trace: PropTypes.bool.isRequired,
   authed: PropTypes.bool.isRequired,
   locked: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
   user: PropTypes.object.isRequired,
   filtered: PropTypes.bool.isRequired,
   toggleFilter: PropTypes.func.isRequired,
   setBounds: PropTypes.func.isRequired,
   itinerary: PropTypes.object.isRequired,
   routes: PropTypes.array.isRequired,
-  loopTime: PropTypes.number.isRequired,
+  loopLength: PropTypes.number.isRequired,
   openItinerary: PropTypes.bool.isRequired,
   openSidebar: PropTypes.bool.isRequired,
   push: PropTypes.func.isRequired
@@ -389,9 +392,10 @@ const connected = connect(
     user: state.user.item,
     itinerary: state.itinerary.item,
     locked: state.itinerary.locked,
-    routes: state.itinerary.routes,
-    loopTime: state.itinerary.loopTime,
+    routes: state.itinerary.planRoutes.length ? state.itinerary.planRoutes : state.itinerary.routes,
+    loopLength: state.itinerary.loopLength,
     openItinerary: state.itinerary.openItinerary,
+    loading: state.place.loading || state.transaction.loading || !state.place.initialized,
     openSidebar:
       props.location.pathname !==
       stringify(uris.pages.home, {

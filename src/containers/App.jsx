@@ -1,24 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { asyncConnect } from 'redux-connect';
 import Helmet from 'react-helmet';
 import config from '../config';
-import Loading from '../components/Loading';
 
-const App = props =>
+const App = props => (
   <div>
     {props.children}
-    {
-      props.loading ? <Loading /> : ''
-    }
     <Helmet {...config.app.head} title={config.app.description} />
     <script src="/js/analytics.js" />
-  </div>;
+  </div>
+);
 
 App.propTypes = {
-  children: PropTypes.element,
-  loading: PropTypes.bool,
+  children: PropTypes.element
 };
 
 App.contextTypes = {
@@ -27,18 +22,11 @@ App.contextTypes = {
   i18n: PropTypes.object.isRequired
 };
 
-const connected = connect(
-  state => ({
-    loading: state.place.loading ||
-             state.transaction.loading ||
-             !state.place.initialized
-  }),
-  {}
-)(App);
-
-export default asyncConnect([{
-  promise: () => {
-    const promises = [];
-    return Promise.all(promises);
+export default asyncConnect([
+  {
+    promise: () => {
+      const promises = [];
+      return Promise.all(promises);
+    }
   }
-}])(connected);
+])(App);

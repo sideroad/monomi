@@ -26,12 +26,12 @@ class WorldMap extends Component {
   }
 
   animate() {
-    const timestamp = Date.now();
-    const loopLength = this.props.loopTime < 2 ? 2 : this.props.loopTime;
-    const loopTime = this.props.loopTime * 10;
+    const { loopLength, animationSpeed } = this.props;
+    const timestamp = Date.now() / 1000;
+    const loopTime = loopLength / animationSpeed;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength || 0
+      time: ((timestamp % loopTime) / loopTime) * loopLength
     });
     this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
   }
@@ -82,8 +82,7 @@ class WorldMap extends Component {
           getPath: d => d.segments,
           getColor: () => [170, 207, 83],
           opacity: 1,
-          strokeWidth: 100,
-          trailLength: 100,
+          trailLength: 120,
           currentTime: this.state.time
         })
       );
@@ -127,14 +126,16 @@ WorldMap.propTypes = {
   onLayerClick: PropTypes.func.isRequired,
   onViewportChange: PropTypes.func.isRequired,
   routes: PropTypes.array.isRequired,
-  loopTime: PropTypes.number.isRequired
+  loopLength: PropTypes.number.isRequired,
+  animationSpeed: PropTypes.number
 };
 
 WorldMap.defaultProps = {
   width: undefined,
   height: undefined,
   selected: {},
-  current: {}
+  current: {},
+  animationSpeed: 120
 };
 
 export default WorldMap;

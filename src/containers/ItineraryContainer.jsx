@@ -3,21 +3,22 @@ import { connect } from 'react-redux';
 import { asyncConnect } from 'redux-connect';
 import Itinerary from '../components/Itinerary';
 import { disableTrace, setPlace } from '../reducers/place';
-import { lock as lockItinerary } from '../reducers/itinerary';
+import { lock as lockItinerary, setPlan } from '../reducers/itinerary';
 
 const ItineraryContainer = (props, context) => (
   <div>
     <Itinerary
       {...props.itinerary}
       locked={props.locked}
-      onClickPlace={(place) => {
+      onClickPlan={(plan) => {
         props.disableTrace();
         context.fetcher.place
           .get({
-            id: place.id
+            id: plan.place.id
           })
           .then((res) => {
             props.setPlace(res.body);
+            props.setPlan(plan);
           });
       }}
       onClickLock={props.lockItinerary}
@@ -102,6 +103,7 @@ const connected = connect(
   {
     disableTrace,
     setPlace,
+    setPlan,
     lockItinerary
   }
 )(ItineraryContainer);

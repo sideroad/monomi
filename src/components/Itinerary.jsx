@@ -32,7 +32,7 @@ const SortableItem = SortableElement(
   ({
     plan,
     locked,
-    onClickPlace,
+    onClickPlan,
     onClickRemove,
     onClickCommunication,
     onChangeSojourn,
@@ -58,13 +58,13 @@ const SortableItem = SortableElement(
           </div>
         </div>
         {locked ? (
-          <Plan plan={plan} onClick={() => onClickPlace(plan.place)} />
+          <Plan plan={plan} onClick={() => onClickPlan(plan)} />
         ) : (
           <DragHandle plan={plan} locked={locked} />
         )}
         {!locked ? (
           <div className={styles.right}>
-            <button className={styles.name} onClick={() => onClickPlace(plan.place)}>
+            <button className={styles.name} onClick={() => onClickPlan(plan)}>
               {plan.place.name}
             </button>
             <div className={styles.control}>
@@ -145,7 +145,7 @@ const SortableList = SortableContainer(
     plans,
     locked,
     onClickLock,
-    onClickPlace,
+    onClickPlan,
     onClickRemove,
     onClickCommunication,
     onChangeSojourn,
@@ -181,7 +181,7 @@ const SortableList = SortableContainer(
           locked={locked}
           disabled={locked}
           onClickRemove={onClickRemove}
-          onClickPlace={onClickPlace}
+          onClickPlan={onClickPlan}
           onClickCommunication={onClickCommunication}
           onChangeSojourn={onChangeSojourn}
           onChangeItineraryTime={onChangeItineraryTime}
@@ -331,7 +331,7 @@ class Itinerary extends Component {
           openDatePicker={this.openDatePicker}
           openCalendar={this.openCalendar}
           onClickRemove={this.onClickRemove}
-          onClickPlace={this.props.onClickPlace}
+          onClickPlan={this.props.onClickPlan}
           onClickCommunication={this.onClickCommunication}
           onChangeSojourn={this.onChangeSojourn}
           onChangeItineraryTime={this.onChangeItineraryTime}
@@ -360,7 +360,7 @@ Itinerary.propTypes = {
   plans: PropTypes.array.isRequired,
   locked: PropTypes.bool.isRequired,
   onClickLock: PropTypes.func.isRequired,
-  onClickPlace: PropTypes.func.isRequired,
+  onClickPlan: PropTypes.func.isRequired,
   onChangeItineraryDate: PropTypes.func.isRequired,
   onReplace: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,

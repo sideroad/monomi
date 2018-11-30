@@ -2,6 +2,7 @@ import polyline from '@mapbox/polyline';
 import flatten from 'lodash/flatten';
 
 const LOCK = 'itinerary/LOCK';
+const SET_PLAN = 'itinerary/SET_PLAN';
 const GETS_START = 'itinerary/GETS_START';
 const GETS_SUCCESS = 'itinerary/GETS_SUCCESS';
 const GETS_FAIL = 'itinerary/GETS_FAIL';
@@ -13,11 +14,12 @@ const initialState = {
   item: {},
   items: [],
   routes: [],
+  planRoutes: [],
   locked: true,
   loaded: false,
   loading: false,
   openItinerary: false,
-  loopTime: 1000
+  loopLength: 450
 };
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
@@ -26,6 +28,36 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         locked: !state.locked
       };
+    case SET_PLAN: {
+      const planIndex = state.item.plans.findIndex(plan => plan.id === action.plan.id);
+      const selectedRoutes = [state.item.plans[planIndex - 1], state.item.plans[planIndex]].filter(
+        plan => plan && plan.points
+      );
+      const segmentsLength = selectedRoutes.reduce(
+        (store, plan) => polyline.decode(plan.points).length + store,
+        0
+      );
+      let count = 0;
+      return {
+        ...state,
+        planRoutes: [
+          {
+            vendor: 1,
+            segments: flatten(
+              selectedRoutes.map(plan =>
+                polyline
+                  .decode(plan.points)
+                  .map(([lat, lng]) => [
+                    lng,
+                    lat,
+                    (state.loopLength / segmentsLength) * (count += 1)
+                  ])
+              )
+            )
+          }
+        ]
+      };
+    }
     case GETS_START:
       return {
         ...state,
@@ -51,26 +83,26 @@ export default function reducer(state = initialState, action = {}) {
         loading: true
       };
     case GET_SUCCESS: {
-      let count = 0;
-      const segments = flatten(
-        action.res.body.plans.map(plan =>
-          plan.points
-            ? polyline.decode(plan.points).map(([lat, lng]) => [lng, lat, (count += 1)])
-            : []
-        )
-      );
       return {
         ...state,
         loading: false,
         loaded: true,
         item: action.res.body,
-        routes: [
-          {
-            vendor: 1,
-            segments
-          }
-        ],
-        loopTime: count,
+        planRoutes: [],
+        routes: action.res.body.plans
+          .filter(plan => plan.points)
+          .map((plan) => {
+            const segments = polyline.decode(plan.points);
+            return {
+              vendor: 1,
+              segments: segments.map(([lat, lng], index) => [
+                lng,
+                lat,
+                (state.loopLength / segments.length) * index
+              ])
+            };
+          })
+          .filter(route => route),
         openItinerary: true
       };
     }
@@ -89,5 +121,12 @@ export default function reducer(state = initialState, action = {}) {
 export function lock() {
   return {
     type: LOCK
+  };
+}
+
+export function setPlan(plan) {
+  return {
+    type: SET_PLAN,
+    plan
   };
 }
