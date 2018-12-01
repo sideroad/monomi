@@ -320,17 +320,7 @@ export default function ({ app }) {
           ).then(res => resolve(res));
         });
       } else {
-        resolve(
-          plans.concat([
-            {
-              ...from,
-              transit: 0,
-              end: '',
-              points: '',
-              page: ''
-            }
-          ])
-        );
+        resolve(plans);
       }
     });
 
