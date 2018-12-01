@@ -98,7 +98,7 @@ class WorldMap extends Component {
         {...this.props.mapViewState}
         mapboxApiAccessToken={TOKEN}
         dragRotate
-        mapStyle="mapbox://styles/sideroad/ciz10g2k7000p2rq7hd9jp215"
+        mapStyle="mapbox://styles/sideroad/cjp5ew6o10s0l2rofj1trv6u8"
         onViewportChange={this.props.onViewportChange}
       >
         <DeckGL

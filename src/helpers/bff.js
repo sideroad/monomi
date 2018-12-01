@@ -320,7 +320,7 @@ export default function ({ app }) {
           ).then(res => resolve(res));
         });
       } else {
-        resolve(plans);
+        resolve(plans.concat([from]));
       }
     });
 
