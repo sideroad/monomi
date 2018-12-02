@@ -45,16 +45,16 @@ const SortableItem = SortableElement(
           <div className={`${styles.start} ${locked ? styles.locked : ''}`}>
             {moment(plan.start).isSame(moment(start)) && !locked ? (
               <TimeControl
-                hours={moment(start).hours()}
-                minutes={moment(start).minutes()}
+                hours={moment.parseZone(start).hours()}
+                minutes={moment.parseZone(start).minutes()}
                 onSubmit={onChangeItineraryTime}
               />
             ) : (
-              moment(plan.start).format('HH:mm')
+              moment.parseZone(plan.start).format('HH:mm')
             )}
           </div>
           <div className={`${styles.end} ${locked ? styles.locked : ''}`}>
-            {plan.end ? moment(plan.end).format('HH:mm') : ''}
+            {plan.end ? moment.parseZone(plan.end).format('HH:mm') : ''}
           </div>
         </div>
         {locked ? (
