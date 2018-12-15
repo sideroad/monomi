@@ -281,7 +281,8 @@ export default function ({ app }) {
             ...response.body,
             points: response.body.routes[0].overview_polyline.points
           },
-          nextStart: moment(from.start)
+          nextStart: moment
+            .parseZone(from.start)
             .add(from.sojourn, 'minutes')
             .add(response.body.routes[0].legs[0].duration.value, 'seconds')
             .format()
@@ -307,7 +308,8 @@ export default function ({ app }) {
             plans.concat([
               {
                 ...from,
-                end: moment(from.start)
+                end: moment
+                  .parseZone(from.start)
                   .add(from.sojourn, 'minutes')
                   .format(),
                 transit: Math.ceil(direction.routes[0].legs[0].duration.value / 60),
@@ -320,7 +322,18 @@ export default function ({ app }) {
           ).then(res => resolve(res));
         });
       } else {
-        resolve(plans.concat([from]));
+        console.log(from);
+        resolve(
+          plans.concat([
+            {
+              ...from,
+              end: moment
+                .parseZone(from.start)
+                .add(from.sojourn, 'minutes')
+                .format()
+            }
+          ])
+        );
       }
     });
 
@@ -357,12 +370,19 @@ export default function ({ app }) {
         plans
           .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
           .map((plan, index) =>
-            index === 0 ? { ...plan, start: moment(itinerary.start).format() } : plan
+            index === 0 ? { ...plan, start: moment.parseZone(itinerary.start).format() } : plan
           )
       ).then((plansWithDirection) => {
         itineraryCache[req.params.id] = {
           ...itinerary,
-          plans: plansWithDirection.filter(plan => plan)
+          start: moment.parseZone(itinerary.start).format('YYYY-MM-DDTHH:mm:ss'),
+          plans: plansWithDirection
+            .filter(plan => plan)
+            .map(plan => ({
+              ...plan,
+              start: moment.parseZone(plan.start).format('YYYY-MM-DDTHH:mm:ss'),
+              end: moment.parseZone(plan.end).format('YYYY-MM-DDTHH:mm:ss')
+            }))
         };
         res.json(itineraryCache[req.params.id]);
       });
