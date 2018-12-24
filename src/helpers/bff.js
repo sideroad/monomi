@@ -324,15 +324,17 @@ export default function ({ app }) {
       } else {
         console.log(from);
         resolve(
-          plans.concat([
-            {
-              ...from,
-              end: moment
-                .parseZone(from.start)
-                .add(from.sojourn, 'minutes')
-                .format()
-            }
-          ])
+          from
+            ? plans.concat([
+              {
+                ...from,
+                end: moment
+                    .parseZone(from.start)
+                    .add(from.sojourn, 'minutes')
+                    .format()
+              }
+            ])
+            : plans
         );
       }
     });
