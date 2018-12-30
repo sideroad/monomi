@@ -1,5 +1,5 @@
 import { proxy } from 'koiki';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import request from 'superagent';
 import redisModule from 'cache-service-redis';
 import config from '../config';
@@ -338,13 +338,17 @@ export default function ({ app }) {
         );
       }
     });
+  const getLocationFromPlans = (plans) => {
+    const plan = plans.sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))[0];
+    return `${plan.place.lat},${plan.place.lng}`;
+  };
 
   app.post('/apis/itineraries', (req, res) => {
     request
       .post('https://chaus.now.sh/apis/monomi/itineraries')
       .send({
         ...req.body,
-        start: moment(req.body.start).format(),
+        start: req.body.start,
         user: req.user.id
       })
       .then(response => res.json(response.body), err => console.log(err) || res.json({}));
@@ -366,19 +370,36 @@ export default function ({ app }) {
           }&limit=1000&expands=place&orderBy=order`
         )
         .then(response => response.body.items)
-    ]).then(([itinerary, plans]) => {
-      applyStartTime(
-        req,
-        plans
-          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-          .map((plan, index) =>
-            index === 0 ? { ...plan, start: moment.parseZone(itinerary.start).format() } : plan
-          )
-      ).then((plansWithDirection) => {
+    ])
+      .then(([itinerary, plans]) =>
+        plans.length
+          ? request
+              .get(
+                `https://maps.googleapis.com/maps/api/timezone/json?location=${getLocationFromPlans(
+                  plans
+                )}&timestamp=${new Date(itinerary.start).getTime()}&key=${config.googleapis.key}`
+              )
+              .use(cache)
+              .then(response => response.body)
+              .then(response =>
+                applyStartTime(
+                  req,
+                  plans
+                    .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+                    .map((plan, index) =>
+                      index === 0
+                        ? { ...plan, start: moment.tz(itinerary.start, response.timeZoneId) }
+                        : plan
+                    )
+                ).then(plans => ({ plans, itinerary }))
+              )
+          : { plans, itinerary }
+      )
+      .then(({ itinerary, plans }) => {
         itineraryCache[req.params.id] = {
           ...itinerary,
           start: moment.parseZone(itinerary.start).format('YYYY-MM-DDTHH:mm:ss'),
-          plans: plansWithDirection
+          plans: plans
             .filter(plan => plan)
             .map(plan => ({
               ...plan,
@@ -387,8 +408,8 @@ export default function ({ app }) {
             }))
         };
         res.json(itineraryCache[req.params.id]);
-      });
-    });
+      })
+      .catch(error => console.error(error));
   });
 
   app.post('/apis/itineraries/:id', (req, res) => {
@@ -396,7 +417,7 @@ export default function ({ app }) {
       .post(`https://chaus.now.sh/apis/monomi/itineraries/${req.params.id}`)
       .send({
         ...req.body,
-        start: moment(req.body.start).format()
+        start: req.body.start
       })
       .then(() => {
         itineraryCache[req.params.id] = undefined;

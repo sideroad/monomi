@@ -229,7 +229,7 @@ class Itinerary extends Component {
         .minutes(current.minutes())
         .seconds(current.seconds())
         .milliseconds(current.milliseconds())
-        .format()
+        .format('YYYY-MM-DDThh:mm:ss')
     );
     this.setState({
       openDatePicker: false
@@ -242,7 +242,7 @@ class Itinerary extends Component {
       current
         .hours(hours)
         .minutes(minutes)
-        .format()
+        .format('YYYY-MM-DDThh:mm:ss')
     );
     this.setState({
       openDatePicker: false

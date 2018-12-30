@@ -11,7 +11,7 @@ const ui = {
   // eslint-disable-next-line global-require
   fa: require('../css/koiki-ui/fa/less/font-awesome.less'),
   // eslint-disable-next-line global-require
-  input: require('../css/koiki-ui/input.less'),
+  input: require('../css/koiki-ui/input.less')
 };
 
 class Itineraries extends Component {
@@ -20,7 +20,7 @@ class Itineraries extends Component {
     this.state = {
       focused: false,
       name: '',
-      openCalendar: false,
+      openCalendar: false
     };
     autoBind(this);
   }
@@ -46,23 +46,23 @@ class Itineraries extends Component {
   onSubmit(e) {
     e.preventDefault();
     this.setState({
-      openCalendar: true,
+      openCalendar: true
     });
   }
 
   onSelectItineraryDate(start) {
     this.props.onAddItinerary({
       name: this.state.name,
-      start: moment(start).format()
+      start: moment(start).format('YYYY-MM-DDT00:00:00')
     });
     this.setState({
-      openCalendar: false,
+      openCalendar: false
     });
   }
 
   closeCalendar() {
     this.setState({
-      openCalendar: false,
+      openCalendar: false
     });
   }
 
@@ -70,39 +70,33 @@ class Itineraries extends Component {
     return (
       <div>
         <ul className={styles.list}>
-          {
-            this.props.itineraries.map(itinerary =>
-              <li key={itinerary.id} className={styles.item} >
-                <button
-                  className={styles.itinerary}
-                  onClick={() => this.props.onClickItinerary(itinerary)}
-                >
-                  {itinerary.name}
-                </button>
-              </li>
-            )
-          }
+          {this.props.itineraries.map(itinerary => (
+            <li key={itinerary.id} className={styles.item}>
+              <button
+                className={styles.itinerary}
+                onClick={() => this.props.onClickItinerary(itinerary)}
+              >
+                {itinerary.name}
+              </button>
+            </li>
+          ))}
           <li className={styles.item}>
-            {
-              this.state.focused ?
-                <form className={styles.form} onSubmit={this.onSubmit}>
-                  <Input
-                    focused
-                    icon="fa-plus"
-                    styles={ui}
-                    value={this.state.name}
-                    onBlur={this.onBlurAddButton}
-                    onChange={this.onChangeAddButton}
-                  />
-                </form>
-              :
-                <button
-                  className={styles.add}
-                  onClick={this.onClickAddButton}
-                >
-                  <i className={`${ui.fa.fa} ${ui.fa['fa-plus']}`} />
-                </button>
-            }
+            {this.state.focused ? (
+              <form className={styles.form} onSubmit={this.onSubmit}>
+                <Input
+                  focused
+                  icon="fa-plus"
+                  styles={ui}
+                  value={this.state.name}
+                  onBlur={this.onBlurAddButton}
+                  onChange={this.onChangeAddButton}
+                />
+              </form>
+            ) : (
+              <button className={styles.add} onClick={this.onClickAddButton}>
+                <i className={`${ui.fa.fa} ${ui.fa['fa-plus']}`} />
+              </button>
+            )}
           </li>
         </ul>
         <ModalDatePicker
@@ -118,7 +112,7 @@ class Itineraries extends Component {
 Itineraries.propTypes = {
   itineraries: PropTypes.array,
   onAddItinerary: PropTypes.func.isRequired,
-  onClickItinerary: PropTypes.func.isRequired,
+  onClickItinerary: PropTypes.func.isRequired
 };
 
 Itineraries.defaultProps = {
