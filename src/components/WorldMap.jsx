@@ -4,6 +4,7 @@ import DeckGL, { ScatterplotLayer } from 'deck.gl';
 import MapGL from 'react-map-gl';
 import { TripsLayer } from '@deck.gl/experimental-layers';
 import config from '../config';
+import constants from '../constants';
 
 const TOKEN = config.mapbox.token;
 
@@ -26,14 +27,16 @@ class WorldMap extends Component {
   }
 
   animate() {
-    const { loopLength, animationSpeed } = this.props;
-    const timestamp = Date.now() / 1000;
-    const loopTime = loopLength / animationSpeed;
+    if (this.props.routes.length && this.props.routes[0].segments.length > 1) {
+      const { loopLength, animationSpeed } = this.props;
+      const timestamp = Date.now() / 1000;
+      const loopTime = loopLength / animationSpeed;
 
-    this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
-    });
-    this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
+      this.setState({
+        time: ((timestamp % loopTime) / loopTime) * loopLength
+      });
+      this.animationFrame = window.requestAnimationFrame(this.animate.bind(this));
+    }
   }
 
   render() {
@@ -43,27 +46,7 @@ class WorldMap extends Component {
     const layers = [
       new ScatterplotLayer({
         id: 'places',
-        data: this.props.places
-          .concat(
-            [this.props.selected]
-              .filter(item => item.id)
-              .map(item => ({
-                ...item,
-                color: [230, 230, 230],
-                radius: 1,
-                position: [item.lng, item.lat, 0]
-              }))
-          )
-          .concat(
-            [this.props.current]
-              .filter(item => item.id)
-              .map(item => ({
-                ...item,
-                color: [170, 207, 83],
-                radius: 1,
-                position: [item.lng, item.lat, 0]
-              }))
-          ),
+        data: this.props.places,
         getPosition: d => d.position,
         getColor: d => d.color,
         opacity: 0.75,
@@ -80,7 +63,7 @@ class WorldMap extends Component {
           id: 'routes',
           data: this.props.routes,
           getPath: d => d.segments,
-          getColor: () => [170, 207, 83],
+          getColor: () => constants.ROUTE,
           opacity: 1,
           trailLength: 120,
           currentTime: this.state.time

@@ -4,6 +4,7 @@ import request from 'superagent';
 import redisModule from 'cache-service-redis';
 import config from '../config';
 import { TAG, PLACE } from '../reducers/suggest';
+import constants from '../constants';
 
 const redisCache = new redisModule({
   redisEnv: 'MONOMI_REDISCLOUD_URL',
@@ -134,7 +135,7 @@ export default function ({ app }) {
     ]).then(([place, favorites]) => {
       res.json({
         ...place,
-        color: favorites.includes(place.id) ? [236, 109, 113] : [44, 169, 225],
+        color: favorites.includes(place.id) ? constants.FAVORITE : constants.PLACE,
         favorite: favorites.includes(place.id)
       });
     });
@@ -153,7 +154,7 @@ export default function ({ app }) {
       res.json({
         items: places.map(place => ({
           ...place,
-          color: favorites.includes(place.id) ? [236, 109, 113] : [44, 169, 225],
+          color: favorites.includes(place.id) ? constants.FAVORITE : constants.PLACE,
           favorite: favorites.includes(place.id),
           radius: 1,
           position: [place.lng, place.lat, 0]

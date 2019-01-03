@@ -31,6 +31,7 @@ import {
   doubleBounds,
   isInside
 } from '../helpers/location';
+import constants from '../constants';
 
 const styles = require('../css/home.less');
 
@@ -157,7 +158,7 @@ class Home extends Component {
       this.props.setPlace({
         ...this.props.place,
         favorite: !this.props.place.favorite,
-        color: !this.props.place.favorite ? [236, 109, 113] : [44, 169, 225]
+        color: !this.props.place.favorite ? constants.FAVORITE : constants.PLACE
       })
     );
   }
@@ -233,7 +234,7 @@ class Home extends Component {
   }
 
   onLayerClick(info) {
-    if (info) {
+    if (info && info.object) {
       this.props.setPlace(info.object);
     }
   }
@@ -280,6 +281,31 @@ class Home extends Component {
   }
 
   render() {
+    const places = this.props.places
+      .map(item =>
+        this.props.place && item.id === this.props.place.id
+          ? {
+            ...item,
+            color: constants.SELECTED,
+            radius: 1,
+            position: [item.lng, item.lat, 0]
+          }
+          : {
+            ...item,
+            radius: 1,
+            position: [item.lng, item.lat, 0]
+          }
+      )
+      .concat(
+        [this.props.current]
+          .filter(item => item.id)
+          .map(item => ({
+            ...item,
+            color: constants.CURRENT,
+            radius: 1,
+            position: [item.lng, item.lat, 0]
+          }))
+      );
     return (
       <div className={styles.container}>
         <FindPlace
@@ -316,11 +342,9 @@ class Home extends Component {
           mapViewState={this.state.mapViewState}
           width={this.state.width}
           height={this.state.height}
-          places={this.props.places}
+          places={places}
           routes={this.props.routes}
           loopLength={this.props.loopLength}
-          selected={this.props.place}
-          current={this.props.current}
           onViewportChange={this.onViewportChange}
           onLayerClick={this.onLayerClick}
           placeInitialized={this.props.placeInitialized}

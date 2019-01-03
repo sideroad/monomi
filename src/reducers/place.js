@@ -26,22 +26,23 @@ const initialState = {
   bounds: {
     ne: {
       lat: 85,
-      lng: 180,
+      lng: 180
     },
     sw: {
       lat: -85,
-      lng: -180,
+      lng: -180
     }
   }
 };
 
 const filter = (filtered, items, bounds) => {
   const targets = filtered ? items.filter(item => item.favorite) : items;
-  return targets.filter(item =>
-    item.lat >= bounds.ne.lat &&
-    item.lat <= bounds.sw.lat &&
-    item.lng >= bounds.ne.lng &&
-    item.lng <= bounds.sw.lng
+  return targets.filter(
+    item =>
+      item.lat >= bounds.ne.lat &&
+      item.lat <= bounds.sw.lat &&
+      item.lng >= bounds.ne.lng &&
+      item.lng <= bounds.sw.lng
   );
 };
 
@@ -54,7 +55,7 @@ export default function reducer(state = initialState, action = {}) {
       };
     case REFRESH:
       return {
-        ...state,
+        ...state
       };
     case TOGGLE_FAVORITE_FILTER: {
       const filtered = !state.filtered;
@@ -97,15 +98,16 @@ export default function reducer(state = initialState, action = {}) {
         error: action.error
       };
     case SET_PLACE: {
-      const exists = state.items.filter(item => item.id === action.item.id).length;
-      const items = exists ? state.items : state.items.concat([action.item]);
+      const items = state.items.find(item => item.id === action.item.id)
+        ? state.items.map(item => (item.id === action.item.id ? action.item : item))
+        : state.items.concat([action.item]);
       return {
         ...state,
         loading: false,
         loaded: true,
         item: action.item,
         items,
-        targets: filter(state.filtered, items, state.bounds),
+        targets: filter(state.filtered, items, state.bounds)
       };
     }
     case SET_PLACES:
@@ -114,7 +116,7 @@ export default function reducer(state = initialState, action = {}) {
         loading: false,
         loaded: true,
         items: action.items,
-        targets: filter(state.filtered, action.items, state.bounds),
+        targets: filter(state.filtered, action.items, state.bounds)
       };
     case SET_CURRENT_PLACE:
       return {
@@ -138,7 +140,7 @@ export default function reducer(state = initialState, action = {}) {
       return {
         ...state,
         bounds: action.bounds,
-        targets: filter(state.filtered, state.items, action.bounds),
+        targets: filter(state.filtered, state.items, action.bounds)
       };
     default:
       return state;
@@ -147,7 +149,7 @@ export default function reducer(state = initialState, action = {}) {
 
 export function initialized() {
   return {
-    type: INITIALIZED,
+    type: INITIALIZED
   };
 }
 
@@ -193,6 +195,6 @@ export function toggleFilter() {
 export function setBounds(bounds) {
   return {
     type: SET_BOUNDS,
-    bounds,
+    bounds
   };
 }
