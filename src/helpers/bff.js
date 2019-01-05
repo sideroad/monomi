@@ -44,7 +44,8 @@ export default function ({ app }) {
       })
       .then(() => {
         res.json({});
-      });
+      })
+      .catch(e => console.error(e));
   });
   app.delete('/apis/favorites', (req, res) => {
     if (!req.user || !req.user.id) {
@@ -59,7 +60,8 @@ export default function ({ app }) {
       })
       .then(() => {
         res.json({});
-      });
+      })
+      .catch(e => console.error(e));
   });
   app.get('/apis/find', (req, res) => {
     request
@@ -96,13 +98,10 @@ export default function ({ app }) {
             response =>
               request
                 .get(`https://chaus.now.sh/apis/monomi/places/${response.body.id}`)
-                .use(cache)
                 .then(json => json.body),
             () =>
               request
-                .get(
-                  `https://chaus.now.sh/apis/monomi/places?name=${encodeURIComponent(place.name)}`
-                )
+                .get(`https://chaus.now.sh/apis/monomi/places?lat=${place.lat}&lng=${place.lng}`)
                 .then(json => json.body.items[0])
           )
       )
@@ -125,7 +124,6 @@ export default function ({ app }) {
     Promise.all([
       request
         .get(`https://chaus.now.sh/apis/monomi/places/${req.params.id}`)
-        .use(cache)
         .then(response => response.body),
       request
         .get(
@@ -209,7 +207,6 @@ export default function ({ app }) {
             req.query.input
           )}*&limit=1000`
         )
-        .use(cache)
         .then(response =>
           response.body.items.map(item => ({
             ...item,

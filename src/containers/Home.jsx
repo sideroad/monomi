@@ -281,31 +281,15 @@ class Home extends Component {
   }
 
   render() {
-    const places = this.props.places
-      .map(item =>
-        this.props.place && item.id === this.props.place.id
-          ? {
-            ...item,
-            color: constants.SELECTED,
-            radius: 1,
-            position: [item.lng, item.lat, 0]
-          }
-          : {
-            ...item,
-            radius: 1,
-            position: [item.lng, item.lat, 0]
-          }
-      )
-      .concat(
-        [this.props.current]
-          .filter(item => item.id)
-          .map(item => ({
-            ...item,
-            color: constants.CURRENT,
-            radius: 1,
-            position: [item.lng, item.lat, 0]
-          }))
-      );
+    const places = this.props.places.map(item =>
+      this.props.place && item.id === this.props.place.id
+        ? {
+          ...item,
+          color: constants.SELECTED,
+          radius: 1.25
+        }
+        : item
+    );
     return (
       <div className={styles.container}>
         <FindPlace
@@ -342,7 +326,17 @@ class Home extends Component {
           mapViewState={this.state.mapViewState}
           width={this.state.width}
           height={this.state.height}
-          places={places}
+          places={
+            this.props.current
+              ? places.concat([
+                {
+                  ...this.props.current,
+                  color: constants.CURRENT,
+                  radius: 1.25
+                }
+              ])
+              : places
+          }
           routes={this.props.routes}
           loopLength={this.props.loopLength}
           onViewportChange={this.onViewportChange}

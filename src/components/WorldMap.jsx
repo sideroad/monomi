@@ -49,12 +49,13 @@ class WorldMap extends Component {
         data: this.props.places,
         getPosition: d => d.position,
         getColor: d => d.color,
+        getRadius: d => d.radius,
         opacity: 0.75,
         strokeWidth: 2,
         pickable: true,
-        radiusScale: 25,
+        radiusScale: 15,
         radiusMinPixels: 2,
-        radiusMaxPixels: 15
+        radiusMaxPixels: 25
       })
     ];
     if (this.props.routes.length && this.props.routes[0].segments.length > 1) {
@@ -103,8 +104,6 @@ WorldMap.propTypes = {
   height: PropTypes.number,
   mapViewState: PropTypes.object.isRequired,
   places: PropTypes.array.isRequired,
-  selected: PropTypes.object,
-  current: PropTypes.object,
   placeInitialized: PropTypes.func.isRequired,
   onLayerClick: PropTypes.func.isRequired,
   onViewportChange: PropTypes.func.isRequired,
@@ -116,8 +115,6 @@ WorldMap.propTypes = {
 WorldMap.defaultProps = {
   width: undefined,
   height: undefined,
-  selected: {},
-  current: {},
   animationSpeed: 120
 };
 

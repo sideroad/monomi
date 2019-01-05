@@ -70,14 +70,20 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         loading: true
       };
-    case GETS_SUCCESS:
+    case GETS_SUCCESS: {
+      const items = action.res.body.items.map(item => ({
+        ...item,
+        radius: 1,
+        position: [item.lng, item.lat, 0]
+      }));
       return {
         ...state,
         loading: false,
         loaded: true,
-        items: action.res.body.items,
-        targets: filter(state.filtered, action.res.body.items, state.bounds)
+        items,
+        targets: filter(state.filtered, items, state.bounds)
       };
+    }
     case GETS_FAIL:
       return {
         ...state,
@@ -98,14 +104,19 @@ export default function reducer(state = initialState, action = {}) {
         error: action.error
       };
     case SET_PLACE: {
-      const items = state.items.find(item => item.id === action.item.id)
-        ? state.items.map(item => (item.id === action.item.id ? action.item : item))
-        : state.items.concat([action.item]);
+      const actionItem = {
+        ...action.item,
+        radius: 1,
+        position: [action.item.lng, action.item.lat, 0]
+      };
+      const items = state.items.find(item => item.id === actionItem.id)
+        ? state.items.map(item => (item.id === actionItem.id ? actionItem : item))
+        : state.items.concat([actionItem]);
       return {
         ...state,
         loading: false,
         loaded: true,
-        item: action.item,
+        item: actionItem,
         items,
         targets: filter(state.filtered, items, state.bounds)
       };
@@ -123,7 +134,9 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         current: {
           id: 'current-position',
-          ...action.item
+          lat: action.item.lat,
+          lng: action.item.lng,
+          position: [action.item.lng, action.item.lat, 0]
         }
       };
     case ENABLE_TRACE:
