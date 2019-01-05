@@ -256,6 +256,10 @@ class Home extends Component {
     this.props.push(stringify(uris.pages.root, { lang: this.context.lang }));
   }
 
+  onClickBackSideBar() {
+    this.props.push(stringify(uris.pages.itineraries, { lang: this.context.lang }));
+  }
+
   setBounds() {
     setTimeout(() => {
       const bounds = this.worldMap.mapgl.getMap().getBounds();
@@ -315,6 +319,8 @@ class Home extends Component {
           closeClickedOutSide={false}
           onClickOpen={this.onClickOpenSideBar}
           onClickClose={this.onClickCloseSideBar}
+          onClickBack={this.onClickBackSideBar}
+          hasBackButton={this.props.openItinerary && !!this.props.itinerary}
         >
           {this.props.children}
         </SideBar>
@@ -413,7 +419,11 @@ const connected = connect(
     routes: state.itinerary.planRoutes.length ? state.itinerary.planRoutes : state.itinerary.routes,
     loopLength: state.itinerary.loopLength,
     openItinerary: state.itinerary.openItinerary,
-    loading: state.place.loading || state.transaction.loading || !state.place.initialized,
+    loading:
+      state.place.loading ||
+      state.transaction.loading ||
+      !state.place.initialized ||
+      state.itinerary.loading,
     openSidebar:
       props.location.pathname !==
       stringify(uris.pages.home, {
