@@ -26,6 +26,10 @@ class WorldMap extends Component {
     }
   }
 
+  componentWillReceiveProps() {
+    this.animate();
+  }
+
   animate() {
     if (this.props.routes.length && this.props.routes[0].segments.length > 1) {
       const { loopLength, animationSpeed } = this.props;
