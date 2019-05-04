@@ -41,6 +41,7 @@ server({
   },
   manifest: {
     name: config.app.title,
+    short_name: config.app.title,
     description: config.app.description,
     background_color: '#171917'
   }
