@@ -15,13 +15,15 @@ const cache = require('superagent-cache-plugin')(redisCache);
 const itineraryCache = {};
 const getPlacesByTag = req =>
   request
-    .get('https://chaus.now.sh/apis/monomi/taggings')
+    .get('https://chaus.herokuapp.com/apis/monomi/taggings')
     .send({
       ...req.query,
       limit: 100000
     })
     .then(response => response.body.items.map(item => item.place.id))
-    .then(places => request.get(`https://chaus.now.sh/apis/monomi/places?id=${places.join(',')}`))
+    .then(places =>
+      request.get(`https://chaus.herokuapp.com/apis/monomi/places?id=${places.join(',')}`)
+    )
     .then(response => response.body.items);
 
 export default function ({ app }) {
@@ -37,7 +39,7 @@ export default function ({ app }) {
       return;
     }
     request
-      .post('https://chaus.now.sh/apis/monomi/favorites')
+      .post('https://chaus.herokuapp.com/apis/monomi/favorites')
       .send({
         user: req.user.id,
         place: req.body.place
@@ -53,7 +55,7 @@ export default function ({ app }) {
       return;
     }
     request
-      .delete('https://chaus.now.sh/apis/monomi/favorites')
+      .delete('https://chaus.herokuapp.com/apis/monomi/favorites')
       .send({
         user: req.user.id,
         place: req.body.place
@@ -92,23 +94,25 @@ export default function ({ app }) {
       })
       .then(place =>
         request
-          .post('https://chaus.now.sh/apis/monomi/places')
+          .post('https://chaus.herokuapp.com/apis/monomi/places')
           .send(place)
           .then(
             response =>
               request
-                .get(`https://chaus.now.sh/apis/monomi/places/${response.body.id}`)
+                .get(`https://chaus.herokuapp.com/apis/monomi/places/${response.body.id}`)
                 .then(json => json.body),
             () =>
               request
-                .get(`https://chaus.now.sh/apis/monomi/places?lat=${place.lat}&lng=${place.lng}`)
+                .get(
+                  `https://chaus.herokuapp.com/apis/monomi/places?lat=${place.lat}&lng=${place.lng}`
+                )
                 .then(json => json.body.items[0])
           )
       )
       .then(place =>
         request
           .get(
-            `https://chaus.now.sh/apis/monomi/favorites?user=${req.user.id}&place=${
+            `https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${
               place.id
             }&limit=1000`
           )
@@ -123,11 +127,13 @@ export default function ({ app }) {
   app.get('/apis/places/:id', (req, res) => {
     Promise.all([
       request
-        .get(`https://chaus.now.sh/apis/monomi/places/${req.params.id}`)
+        .get(`https://chaus.herokuapp.com/apis/monomi/places/${req.params.id}`)
         .then(response => response.body),
       request
         .get(
-          `https://chaus.now.sh/apis/monomi/favorites?user=${req.user.id}&place=${req.params.id}`
+          `https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&place=${
+            req.params.id
+          }`
         )
         .then(response => response.body.items.map(favorite => favorite.place.id))
     ]).then(([place, favorites]) => {
@@ -143,10 +149,10 @@ export default function ({ app }) {
       req.query.tag
         ? getPlacesByTag(req)
         : request
-            .get('https://chaus.now.sh/apis/monomi/places?limit=100000')
+            .get('https://chaus.herokuapp.com/apis/monomi/places?limit=100000')
             .then(response => response.body.items),
       request
-        .get(`https://chaus.now.sh/apis/monomi/favorites?user=${req.user.id}&limit=1000`)
+        .get(`https://chaus.herokuapp.com/apis/monomi/favorites?user=${req.user.id}&limit=1000`)
         .then(response => response.body.items.map(item => item.place.id))
     ]).then(([places, favorites]) => {
       res.json({
@@ -170,7 +176,7 @@ export default function ({ app }) {
     Promise.all([
       request
         .get(
-          `https://chaus.now.sh/apis/monomi/tags?name=*${encodeURIComponent(
+          `https://chaus.herokuapp.com/apis/monomi/tags?name=*${encodeURIComponent(
             req.query.input
           )}*&limit=1000`
         )
@@ -180,7 +186,7 @@ export default function ({ app }) {
           Promise.all(
             tags.map(tag =>
               request
-                .get(`https://chaus.now.sh/apis/monomi/taggings?tag=${tag.id}&limit=1`)
+                .get(`https://chaus.herokuapp.com/apis/monomi/taggings?tag=${tag.id}&limit=1`)
                 .then(response => ({
                   ...tag,
                   count: response.body.size
@@ -203,7 +209,7 @@ export default function ({ app }) {
         ),
       request
         .get(
-          `https://chaus.now.sh/apis/monomi/places?name=*${encodeURIComponent(
+          `https://chaus.herokuapp.com/apis/monomi/places?name=*${encodeURIComponent(
             req.query.input
           )}*&limit=1000`
         )
@@ -243,7 +249,7 @@ export default function ({ app }) {
 
   app.get('/apis/itineraries', (req, res) => {
     request
-      .get(`https://chaus.now.sh/apis/monomi/itineraries?user=${req.user.id}`)
+      .get(`https://chaus.herokuapp.com/apis/monomi/itineraries?user=${req.user.id}`)
       .then(response => res.json(response.body));
   });
 
@@ -343,7 +349,7 @@ export default function ({ app }) {
 
   app.post('/apis/itineraries', (req, res) => {
     request
-      .post('https://chaus.now.sh/apis/monomi/itineraries')
+      .post('https://chaus.herokuapp.com/apis/monomi/itineraries')
       .send({
         ...req.body,
         start: req.body.start,
@@ -359,11 +365,11 @@ export default function ({ app }) {
     }
     Promise.all([
       request
-        .get(`https://chaus.now.sh/apis/monomi/itineraries/${req.params.id}`)
+        .get(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
         .then(response => response.body),
       request
         .get(
-          `https://chaus.now.sh/apis/monomi/plans?itinerary=${
+          `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
             req.params.id
           }&limit=1000&expands=place&orderBy=order`
         )
@@ -412,7 +418,7 @@ export default function ({ app }) {
 
   app.post('/apis/itineraries/:id', (req, res) => {
     request
-      .post(`https://chaus.now.sh/apis/monomi/itineraries/${req.params.id}`)
+      .post(`https://chaus.herokuapp.com/apis/monomi/itineraries/${req.params.id}`)
       .send({
         ...req.body,
         start: req.body.start
@@ -426,7 +432,7 @@ export default function ({ app }) {
   app.post('/apis/plans', (req, res) => {
     request
       .get(
-        `https://chaus.now.sh/apis/monomi/plans?itinerary=${
+        `https://chaus.herokuapp.com/apis/monomi/plans?itinerary=${
           req.body.itinerary.id
         }&limit=1000&expands=place&orderBy=order`
       )
@@ -437,7 +443,7 @@ export default function ({ app }) {
       )
       .then(order =>
         request
-          .post('https://chaus.now.sh/apis/monomi/plans')
+          .post('https://chaus.herokuapp.com/apis/monomi/plans')
           .send({
             ...req.body,
             itinerary: req.body.itinerary.id,
@@ -456,7 +462,7 @@ export default function ({ app }) {
   app.post('/apis/itineraries/:id/plans', (req, res) => {
     Promise.all(
       req.body.items.map(plan =>
-        request.post(`https://chaus.now.sh/apis/monomi/plans/${plan.id}`).send({
+        request.post(`https://chaus.herokuapp.com/apis/monomi/plans/${plan.id}`).send({
           ...plan,
           place: plan.place.id,
           communication: plan.communication.id,
@@ -473,9 +479,9 @@ export default function ({ app }) {
 
   app.post('/apis/plans/:id', (req, res) => {
     request
-      .post(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`)
+      .post(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`)
       .send(req.body)
-      .then(() => request.get(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`))
+      .then(() => request.get(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`))
       .then((response) => {
         itineraryCache[response.body.itinerary.id] = undefined;
         res.json({});
@@ -483,8 +489,8 @@ export default function ({ app }) {
   });
 
   app.delete('/apis/plans/:id', (req, res) => {
-    request.get(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`).then((response) => {
-      request.delete(`https://chaus.now.sh/apis/monomi/plans/${req.params.id}`).then(() => {
+    request.get(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`).then((response) => {
+      request.delete(`https://chaus.herokuapp.com/apis/monomi/plans/${req.params.id}`).then(() => {
         itineraryCache[response.body.itinerary.id] = undefined;
         res.json({});
       });

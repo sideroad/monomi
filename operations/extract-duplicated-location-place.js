@@ -1,6 +1,6 @@
 const locations = {};
 fetch(
-  'https://chaus.now.sh/apis/monomi/places?user=&place=&fields=&expands=&orderBy=&limit=1000000'
+  'https://chaus.herokuapp.com/apis/monomi/places?user=&place=&fields=&expands=&orderBy=&limit=1000000'
 )
   .then(res => res.json())
   .then(res =>
@@ -26,7 +26,7 @@ fetch(
         counter++;
         setTimeout(
           () =>
-            fetch(`https://chaus.now.sh/apis/monomi/plans?place=${place.id}`)
+            fetch(`https://chaus.herokuapp.com/apis/monomi/plans?place=${place.id}`)
               .then(res => res.json())
               .then(res =>
                 res.items.length
@@ -46,7 +46,7 @@ fetch(
       deletes.map((id) => {
         counter++;
         setTimeout(() => {
-          // fetch(`https://chaus.now.sh/apis/monomi/places/${id}`, { method: 'DELETE' });
+          // fetch(`https://chaus.herokuapp.com/apis/monomi/places/${id}`, { method: 'DELETE' });
         }, counter * 100);
       });
     }, counter * 100);
