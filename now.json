@@ -1,9 +1,17 @@
 {
-  "version": 1,
-  "type": "docker",
-  "regions": ["sfo1"],
-  "features": {
-    "cloud": "v1"
-  },
-  "alias": ["monomi.now.sh"]
+  "name": "monomi",
+  "version": 2,
+  "alias": "monomi.now.sh",
+  "builds": [{ "src": "package.json", "use": "@now/next" }],
+  "routes": [
+    {
+      "src": "/(ja|en)/events/(.+)",
+      "status": 301,
+      "headers": { "Location": "https://monomi.now.sh/events/$2" }
+    },
+    {
+      "src": "/sw-dist.js",
+      "dest": "/static/sw-dist.js"
+    }
+  ]
 }

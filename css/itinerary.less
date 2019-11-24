@@ -1,0 +1,186 @@
+@import "variables.less";
+
+.icon {
+  margin-left: 0.5em;
+  outline: none;
+  border: none;
+  background: none;
+  color: @ama;
+  position: relative;
+}
+
+.itinerary {
+  outline: none;
+  border: none;
+  height: 30px;
+  font-size: 1.5em;
+  background: @sumi;
+  color: @gofun;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  z-index: 4;
+  margin: 0 0 20px 0;
+}
+
+.title {
+  width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buttons {
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.list {
+  list-style: none;
+  overflow-y: scroll; /* has to be scroll, not auto */
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  margin: 20px;
+  position: relative;
+  height: calc(~"100vh - 40px");
+}
+
+.item {
+  list-style: none;
+  z-index: 3;
+  color: @gofun;
+  font-family: "Ubuntu";
+  position: relative;
+  font-size: 0.9em;
+}
+
+.item:last-child {
+  margin-bottom: 40px;
+}
+
+.dragging {
+  opacity: 0.8;
+  background-color: @hai;
+  cursor: -webkit-grabbing;
+}
+
+.time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1em;
+  margin-right: 1em;
+}
+
+.locked {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.place {
+  display: flex;
+  flex-direction: row;
+}
+
+.image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  margin-right: 1em;
+  background-color: @sumi;
+}
+
+.image:hover {
+  opacity: 0.8;
+  cursor: -webkit-grab;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.control {
+  display: flex;
+}
+
+.remove {
+  outline: none;
+  background: none;
+  border: none;
+  color: @maso;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  outline: none;
+  background: none;
+  border: none;
+  color: @ama;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 1.2em;
+}
+
+.mode {
+  margin-right: 0.5em;
+  color: @hai;
+  outline: none;
+  border: none;
+  background: none;
+  opacity: 0.7;
+}
+
+.activate {
+  color: @ama;
+  opacity: 1;
+}
+
+.mode:disabled {
+  color: @gofun;
+}
+
+.transit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5em 0;
+}
+
+.link {
+  color: @ama;
+}
+
+.dashed {
+  position: absolute;
+  left: 73px;
+  width: 0;
+  height: 100%;
+  border: 2px dashed @gofun;
+  opacity: 0.2;
+  z-index: -1;
+}
+
+@media (max-width: 568px) {
+  .buttons {
+    font-size: 1.2em;
+  }
+
+  .item {
+    font-size: 1.2em;
+  }
+}

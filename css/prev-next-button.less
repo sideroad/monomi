@@ -1,0 +1,70 @@
+@import "variables.less";
+
+.button {
+  background-size: cover;
+  background-position: center;
+  background-color: initial;
+  border: none;
+  outline: none;
+  font-size: 3em;
+  height: 1.15em;
+  width: 1.15em;
+  text-align: center;
+  color: @maso;
+
+  &.open {
+    z-index: 10;
+    animation: close 0.3s ease-out;
+    animation-fill-mode: forwards;
+    opacity: 1;
+  }
+
+  &.close {
+    z-index: 6;
+    animation: open 0.3s ease-out;
+    animation-fill-mode: forwards;
+    opacity: 0;
+  }
+
+  i {
+    display: block;
+  }
+}
+
+@keyframes open {
+  0% {
+    transform: rotateX(0deg);
+    z-index: 10;
+    opacity: 1;
+  }
+
+  50% {
+    transform: rotateX(90deg);
+    z-index: 6;
+  }
+
+  100% {
+    transform: rotateX(0deg);
+    z-index: 6;
+    opacity: 0;
+  }
+}
+
+@keyframes close {
+  0% {
+    transform: rotateX(0deg);
+    z-index: 6;
+    opacity: 0;
+  }
+
+  50% {
+    transform: rotateX(90deg);
+    z-index: 10;
+  }
+
+  100% {
+    transform: rotateX(0deg);
+    z-index: 10;
+    opacity: 1;
+  }
+}

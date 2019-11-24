@@ -1,0 +1,121 @@
+@import "variables.less";
+
+.place{
+  display: flex;
+  width: 100vw;
+  height: 100px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+.animate {
+  animation: card-flip 0.3s ease-out;
+  animation-fill-mode: forwards;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.image{
+  width: 100px;
+  height: 100px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.title{
+  display: flex;
+  overflow: hidden;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  height: 50px;
+  padding-left: 1em;
+}
+
+.name{
+  color: @ama;
+  font-size: 1.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.control {
+  height: 50px;
+  padding-left: 1em;
+  display: flex;
+}
+
+.favorite {
+  font-size: 1.5em;
+  color: @maso;
+  outline: none;
+  background: none;
+  border: none;
+}
+
+.itinerary {
+  font-size: 1.5em;
+  color: @moegi;
+  outline: none;
+  background: none;
+  border: none;
+}
+
+.on {
+  animation: flip 0.3s ease-out;
+  animation-fill-mode: forwards;
+}
+
+.off {
+  animation: flip-revert 0.3s ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes card-flip {
+  0% {
+    transform: scale3d(0.75, 0, 1);
+  }
+  50% {
+    transform: scale3d(1.1, 1, 1);
+  }
+  80% {
+    transform: scale3d(0.9, 1.1, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+
+@keyframes flip {
+  0% {
+		transform: rotateY(0deg);
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+	}
+}
+
+@keyframes flip-revert {
+  0% {
+		transform: rotateY(0deg);
+	}
+  50% {
+		transform: rotateY(180deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+	}
+}
