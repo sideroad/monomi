@@ -21,7 +21,7 @@
   "dependencies": {
     "@deck.gl/experimental-layers": "^6.1.0",
     "@mapbox/polyline": "^0.2.0",
-    "async": "^2.0.1",
+    "async": "^2.6.4",
     "babel-polyfill": "^6.3.14",
     "bezier": "^0.1.0",
     "body-parser": "^1.14.2",
