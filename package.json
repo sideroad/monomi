@@ -42,7 +42,7 @@
     "lodash": "^4.17.2",
     "loop-array-calc": "^1.0.0",
     "luma.gl": "^6.1.0",
-    "moment": "^2.10.6",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.23",
     "object-hash": "^1.1.7",
     "pretty-error": "^1.2.0",
