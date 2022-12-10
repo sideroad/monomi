@@ -29,7 +29,7 @@
     "compression": "^1.6.0",
     "cookie-parser": "^1.4.3",
     "deck.gl": "^6.1.0",
-    "express": "^4.13.3",
+    "express": "^4.17.3",
     "express-session": "^1.12.1",
     "fs-extra": "^2.0.0",
     "geolib": "^2.0.23",
